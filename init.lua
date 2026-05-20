@@ -454,7 +454,12 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
   -- default behavior. For example, here we set the section for
   -- cursor location to LINE:COLUMN
   ---@diagnostic disable-next-line: duplicate-set-field
-  statusline.section_location = function() return '%2l:%-2v' end
+  
+  -- rechte Seite der status bar wie in vim gestalten:
+  -- statusline.section_location = function() return '%2l:%-2v' end
+  statusline.section_location = function()
+  return 'row: %l  col: %c  progress: %p%%'
+end
 
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
@@ -1073,9 +1078,9 @@ vim.keymap.set('n', '<c-right>', '<c-w><')
 vim.opt.history = 1000
 
 -- Search
-vim.opt.hlsearch = true
-vim.opt.showmatch = true
-vim.opt.incsearch = true  -- evtl. schon durch inccommand abgedeckt
+-- vim.opt.hlsearch = true
+-- vim.opt.showmatch = true
+-- vim.opt.incsearch = true  -- evtl. schon durch inccommand abgedeckt
 
 -- Editing
 vim.opt.wrap = false
@@ -1093,3 +1098,13 @@ vim.api.nvim_set_hl(0, "NonText",     { bg = "none" })
 vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "none" })
 vim.api.nvim_set_hl(0, "LineNr",      { bg = "none" })
 vim.api.nvim_set_hl(0, "FoldColumn",  { bg = "none" })
+
+-- Statusline besser sichtbar machen
+vim.api.nvim_set_hl(0, "MiniStatuslineModeNormal",  { bg = "#268bd2", fg = "#002b36", bold = true })
+vim.api.nvim_set_hl(0, "MiniStatuslineModeInsert",  { bg = "#2aa198", fg = "#002b36", bold = true })
+vim.api.nvim_set_hl(0, "MiniStatuslineModeVisual",  { bg = "#d33682", fg = "#002b36", bold = true })
+vim.api.nvim_set_hl(0, "MiniStatuslineModeCommand", { bg = "#b58900", fg = "#002b36", bold = true })
+vim.api.nvim_set_hl(0, "MiniStatuslineModeOther",   { bg = "#859900", fg = "#002b36", bold = true })
+vim.api.nvim_set_hl(0, "MiniStatuslineFilename",    { bg = "#073642", fg = "#93a1a1" })
+vim.api.nvim_set_hl(0, "MiniStatuslineFileinfo",    { bg = "#073642", fg = "#93a1a1" })
+vim.api.nvim_set_hl(0, "MiniStatuslineInactive",    { bg = "#073642", fg = "#586e75" })
