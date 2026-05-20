@@ -1002,6 +1002,11 @@ end
 vim.api.nvim_set_hl(0, "Normal", { ctermfg = 252, fg = "#d0d0d0" })
 vim.api.nvim_set_hl(0, "Comment", { ctermfg = 252, fg = "#bfbfbf" })
 
+-- more subtle colours for LSP highlighting:
+vim.api.nvim_set_hl(0, "LspReferenceText",  { bg = "#073642" })
+vim.api.nvim_set_hl(0, "LspReferenceRead",  { bg = "#073642" })
+vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#073642", bold = true })
+
 -- old vimrc file (to be optimized):
 -- ============================================================================
 -- KEY MAPPINGS
@@ -1048,15 +1053,10 @@ vim.keymap.set('n', '<leader>q1', ':q!<cr>')
 -- ============================================================================
 vim.keymap.set('n', 'Y', 'y$')
 
-for _, action in ipairs({'d', 'c', 'y'}) do
-  vim.keymap.set('n', action..'i8', action..'i(')
-  vim.keymap.set('n', action..'a8', action..'a(')
-  vim.keymap.set('n', action..'i7', action..'i{')
-  vim.keymap.set('n', action..'a7', action..'a{')
-  vim.keymap.set('n', action..'i9', action..'i[')
-  vim.keymap.set('n', action..'a9', action..'a[')
-  vim.keymap.set('n', action..'i2', action..'i"')
-  vim.keymap.set('n', action..'a2', action..'a"')
+
+for _, obj in ipairs({{'8','('}, {'7','{'}, {'9','['}, {'2','"'}}) do
+  vim.keymap.set('o', 'i'..obj[1], 'i'..obj[2])
+  vim.keymap.set('o', 'a'..obj[1], 'a'..obj[2])
 end
 
 -- ============================================================================
@@ -1071,6 +1071,9 @@ vim.keymap.set('n', '<c-down>',  '<c-w>-')
 vim.keymap.set('n', '<c-left>',  '<c-w>>')
 vim.keymap.set('n', '<c-right>', '<c-w><')
 
+-- TODO: add shortcuts for window/buffer resizing
+--
+--
 -- =========
 -- noch nicht in init.lua vorhanden:
 
@@ -1108,3 +1111,7 @@ vim.api.nvim_set_hl(0, "MiniStatuslineModeOther",   { bg = "#859900", fg = "#002
 vim.api.nvim_set_hl(0, "MiniStatuslineFilename",    { bg = "#073642", fg = "#93a1a1" })
 vim.api.nvim_set_hl(0, "MiniStatuslineFileinfo",    { bg = "#073642", fg = "#93a1a1" })
 vim.api.nvim_set_hl(0, "MiniStatuslineInactive",    { bg = "#073642", fg = "#586e75" })
+
+-- add plugin for cursor animation:
+vim.pack.add { gh 'sphamba/smear-cursor.nvim' }
+require('smear_cursor').setup()
