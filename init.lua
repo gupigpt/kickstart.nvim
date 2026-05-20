@@ -92,14 +92,14 @@ do
   -- Enable faster startup by caching compiled Lua modules
   vim.loader.enable()
 
-  -- Set <space> as the leader key
+  -- Set <space> as the leader key - NO: Set , as the leader key
   -- See `:help mapleader`
   --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
-  vim.g.mapleader = ' '
-  vim.g.maplocalleader = ' '
+  vim.g.mapleader = ','
+  vim.g.maplocalleader = ','
 
   -- Set to true if you have a Nerd Font installed and selected in the terminal
-  vim.g.have_nerd_font = false
+  vim.g.have_nerd_font = true
 
   -- [[ Setting options ]]
   --  See `:help vim.o`
@@ -110,7 +110,7 @@ do
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
   --  Experiment for yourself to see if you like it!
-  -- vim.o.relativenumber = true
+  vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
@@ -383,6 +383,8 @@ do
   -- change the command under that to load whatever the name of that colorscheme is.
   --
   -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+  -- deaktiviert um NeoSolarized von github/tsuzat zu installieren
+  --[[
   vim.pack.add { gh 'folke/tokyonight.nvim' }
   ---@diagnostic disable-next-line: missing-fields
   require('tokyonight').setup {
@@ -390,11 +392,26 @@ do
       comments = { italic = false }, -- Disable italics in comments
     },
   }
+--]]
+-- neues Theme NeoSolarized:
+vim.pack.add { gh 'Tsuzat/NeoSolarized.nvim' }
+require('NeoSolarized').setup({
+  style = "dark",
+  transparent = true,
+})
+vim.cmd.colorscheme('NeoSolarized')
 
-  -- Load the colorscheme here.
-  -- Like many other themes, this one has different styles, and you could load
-  -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-  vim.cmd.colorscheme 'tokyonight-night'
+-- remove current line coloring
+vim.api.nvim_set_hl(0, "CursorLine", { bg = "none" })
+
+--[[
+-- Load the colorscheme here.
+-- Like many other themes, this one has different styles, and you could load
+-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+vim.cmd.colorscheme 'tokyonight-night'
+vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+--]]
 
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
@@ -975,3 +992,104 @@ end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- Brighter white text:
+vim.api.nvim_set_hl(0, "Normal", { ctermfg = 252, fg = "#d0d0d0" })
+vim.api.nvim_set_hl(0, "Comment", { ctermfg = 252, fg = "#bfbfbf" })
+
+-- old vimrc file (to be optimized):
+-- ============================================================================
+-- KEY MAPPINGS
+-- ============================================================================
+
+-- --- Mode switching ---------------------------------------------------------
+vim.keymap.set('i', 'jj', '<esc>l')
+vim.keymap.set('i', 'jk', '<esc>l')
+vim.keymap.set('i', 'kj', '<esc>l')
+vim.keymap.set('v', 'jk', '<esc>')
+vim.keymap.set('v', 'kj', '<esc>')
+vim.keymap.set('c', 'jj', '<c-c>')
+vim.keymap.set('c', 'jk', '<c-c>')
+vim.keymap.set('c', 'kj', '<c-c>')
+
+vim.keymap.set('n', '<space>', ':')
+vim.keymap.set('v', '<space>', ':')
+
+-- --- Navigation -------------------------------------------------------------
+vim.keymap.set('n', 'ß', '?')
+vim.keymap.set('n', 'ü', '/')
+vim.keymap.set('n', '9', '$')
+vim.keymap.set('v', '9', '$')
+-- Neue Zeile ohne Insert-Mode
+vim.keymap.set('n', 'o', 'o<esc>')
+vim.keymap.set('n', 'O', 'O<esc>')
+
+-- --- Paste behavior ---------------------------------------------------------
+vim.keymap.set('n', 'p', 'P')
+vim.keymap.set('n', 'P', 'p')
+vim.keymap.set('v', '<c-c>', '"+y')
+vim.keymap.set('', '<c-p>', '"+P')
+
+-- --- Command history --------------------------------------------------------
+vim.keymap.set('n', '<leader>j', ':<c-up>')
+vim.keymap.set('n', 'q<space>', 'q:')
+vim.keymap.set('n', 'q7', 'q/')
+
+-- --- Quit -------------------------------------------------------------------
+vim.keymap.set('n', '<leader>q1', ':q!<cr>')
+
+-- ============================================================================
+-- TEXT OBJECT SHORTCUTS
+-- ============================================================================
+vim.keymap.set('n', 'Y', 'y$')
+
+for _, action in ipairs({'d', 'c', 'y'}) do
+  vim.keymap.set('n', action..'i8', action..'i(')
+  vim.keymap.set('n', action..'a8', action..'a(')
+  vim.keymap.set('n', action..'i7', action..'i{')
+  vim.keymap.set('n', action..'a7', action..'a{')
+  vim.keymap.set('n', action..'i9', action..'i[')
+  vim.keymap.set('n', action..'a9', action..'a[')
+  vim.keymap.set('n', action..'i2', action..'i"')
+  vim.keymap.set('n', action..'a2', action..'a"')
+end
+
+-- ============================================================================
+-- WINDOW MANAGEMENT
+-- ============================================================================
+vim.keymap.set('n', '<c-h>', '<c-w>h')
+vim.keymap.set('n', '<c-j>', '<c-w>j')
+vim.keymap.set('n', '<c-k>', '<c-w>k')
+vim.keymap.set('n', '<c-l>', '<c-w>l')
+vim.keymap.set('n', '<c-up>',    '<c-w>+')
+vim.keymap.set('n', '<c-down>',  '<c-w>-')
+vim.keymap.set('n', '<c-left>',  '<c-w>>')
+vim.keymap.set('n', '<c-right>', '<c-w><')
+
+-- =========
+-- noch nicht in init.lua vorhanden:
+
+-- History & Encoding
+vim.opt.history = 1000
+
+-- Search
+vim.opt.hlsearch = true
+vim.opt.showmatch = true
+vim.opt.incsearch = true  -- evtl. schon durch inccommand abgedeckt
+
+-- Editing
+vim.opt.wrap = false
+vim.opt.whichwrap = 'b,s,<,>,[,]'
+
+-- Wildmenu / Completion
+vim.opt.wildmode = 'list:longest'
+vim.opt.wildignore = '*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx'
+
+-- Visual selection highlight
+vim.api.nvim_set_hl(0, "Visual", { bg = "#b58900", fg = "#002b36" })
+
+-- Transparent backgrounds (zusätzliche Gruppen)
+vim.api.nvim_set_hl(0, "NonText",     { bg = "none" })
+vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "none" })
+vim.api.nvim_set_hl(0, "LineNr",      { bg = "none" })
+vim.api.nvim_set_hl(0, "FoldColumn",  { bg = "none" })
