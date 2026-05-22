@@ -413,6 +413,19 @@ vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 --]]
 
+-- Telescope popup – abgestimmt auf NeoSolarized dark
+vim.api.nvim_set_hl(0, "TelescopeNormal",         { bg = "#073642" }) -- Solarized base03, etwas heller als Hintergrund
+vim.api.nvim_set_hl(0, "TelescopeBorder",         { bg = "#073642", fg = "#859900" }) -- grüner Rand
+vim.api.nvim_set_hl(0, "TelescopePromptNormal",   { bg = "#0a4050" }) -- minimal heller
+vim.api.nvim_set_hl(0, "TelescopePromptBorder",   { bg = "#0a4050", fg = "#859900" }) -- auch grün
+vim.api.nvim_set_hl(0, "TelescopePromptTitle",    { bg = "#859900", fg = "#002b36" }) -- grüner Titel
+vim.api.nvim_set_hl(0, "TelescopeResultsNormal",  { bg = "#073642" })
+vim.api.nvim_set_hl(0, "TelescopeResultsBorder",  { bg = "#073642", fg = "#859900" })
+vim.api.nvim_set_hl(0, "TelescopePreviewNormal",  { bg = "#073642" })
+vim.api.nvim_set_hl(0, "TelescopePreviewBorder",  { bg = "#073642", fg = "#859900" })
+vim.api.nvim_set_hl(0, "TelescopeSelection",      { bg = "#0d4a5a", bold = true }) -- Auswahl-Zeile
+vim.api.nvim_set_hl(0, "TelescopeSelectionCaret", { fg = "#859900" })
+
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
   require('todo-comments').setup { signs = false }
