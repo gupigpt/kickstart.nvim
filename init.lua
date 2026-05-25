@@ -366,7 +366,7 @@ do
   vim.pack.add { gh 'folke/which-key.nvim' }
   require('which-key').setup {
     -- Delay between pressing a key and opening which-key (milliseconds)
-    delay = 0,
+    delay = 600, --in millisec - set to sth higher so fast commands don't show a pop up
     icons = { mappings = vim.g.have_nerd_font },
     -- Document existing key chains
     spec = {
@@ -374,6 +374,7 @@ do
       { '<leader>t', group = '[T]oggle' },
       { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
       { 'gr', group = 'LSP Actions', mode = { 'n' } },
+      { '<leader>f', group = 'Fun' }, -- für cellular-automaton
     },
   }
 
@@ -393,18 +394,18 @@ do
     },
   }
 --]]
--- neues Theme NeoSolarized:
-vim.pack.add { gh 'Tsuzat/NeoSolarized.nvim' }
-require('NeoSolarized').setup({
-  style = "dark",
-  transparent = true,
-})
-vim.cmd.colorscheme('NeoSolarized')
+  -- neues Theme NeoSolarized:
+  vim.pack.add { gh 'Tsuzat/NeoSolarized.nvim' }
+  require('NeoSolarized').setup {
+    style = 'dark',
+    transparent = true,
+  }
+  vim.cmd.colorscheme 'NeoSolarized'
 
--- remove current line coloring
-vim.api.nvim_set_hl(0, "CursorLine", { bg = "none" })
+  -- remove current line coloring
+  vim.api.nvim_set_hl(0, 'CursorLine', { bg = 'none' })
 
---[[
+  --[[
 -- Load the colorscheme here.
 -- Like many other themes, this one has different styles, and you could load
 -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
@@ -413,18 +414,18 @@ vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 --]]
 
--- Telescope popup – abgestimmt auf NeoSolarized dark
-vim.api.nvim_set_hl(0, "TelescopeNormal",         { bg = "#073642" }) -- Solarized base03, etwas heller als Hintergrund
-vim.api.nvim_set_hl(0, "TelescopeBorder",         { bg = "#073642", fg = "#859900" }) -- grüner Rand
-vim.api.nvim_set_hl(0, "TelescopePromptNormal",   { bg = "#0a4050" }) -- minimal heller
-vim.api.nvim_set_hl(0, "TelescopePromptBorder",   { bg = "#0a4050", fg = "#859900" }) -- auch grün
-vim.api.nvim_set_hl(0, "TelescopePromptTitle",    { bg = "#859900", fg = "#002b36" }) -- grüner Titel
-vim.api.nvim_set_hl(0, "TelescopeResultsNormal",  { bg = "#073642" })
-vim.api.nvim_set_hl(0, "TelescopeResultsBorder",  { bg = "#073642", fg = "#859900" })
-vim.api.nvim_set_hl(0, "TelescopePreviewNormal",  { bg = "#073642" })
-vim.api.nvim_set_hl(0, "TelescopePreviewBorder",  { bg = "#073642", fg = "#859900" })
-vim.api.nvim_set_hl(0, "TelescopeSelection",      { bg = "#0d4a5a", bold = true }) -- Auswahl-Zeile
-vim.api.nvim_set_hl(0, "TelescopeSelectionCaret", { fg = "#859900" })
+  -- Telescope popup – abgestimmt auf NeoSolarized dark
+  vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = '#073642' }) -- Solarized base03, etwas heller als Hintergrund
+  vim.api.nvim_set_hl(0, 'TelescopeBorder', { bg = '#073642', fg = '#859900' }) -- grüner Rand
+  vim.api.nvim_set_hl(0, 'TelescopePromptNormal', { bg = '#0a4050' }) -- minimal heller
+  vim.api.nvim_set_hl(0, 'TelescopePromptBorder', { bg = '#0a4050', fg = '#859900' }) -- auch grün
+  vim.api.nvim_set_hl(0, 'TelescopePromptTitle', { bg = '#859900', fg = '#002b36' }) -- grüner Titel
+  vim.api.nvim_set_hl(0, 'TelescopeResultsNormal', { bg = '#073642' })
+  vim.api.nvim_set_hl(0, 'TelescopeResultsBorder', { bg = '#073642', fg = '#859900' })
+  vim.api.nvim_set_hl(0, 'TelescopePreviewNormal', { bg = '#073642' })
+  vim.api.nvim_set_hl(0, 'TelescopePreviewBorder', { bg = '#073642', fg = '#859900' })
+  vim.api.nvim_set_hl(0, 'TelescopeSelection', { bg = '#0d4a5a', bold = true }) -- Auswahl-Zeile
+  vim.api.nvim_set_hl(0, 'TelescopeSelectionCaret', { fg = '#859900' })
 
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
@@ -467,12 +468,10 @@ vim.api.nvim_set_hl(0, "TelescopeSelectionCaret", { fg = "#859900" })
   -- default behavior. For example, here we set the section for
   -- cursor location to LINE:COLUMN
   ---@diagnostic disable-next-line: duplicate-set-field
-  
+
   -- rechte Seite der status bar wie in vim gestalten:
   -- statusline.section_location = function() return '%2l:%-2v' end
-  statusline.section_location = function()
-  return 'row: %l  col: %c  progress: %p%%'
-end
+  statusline.section_location = function() return 'row: %l  col: %c  progress: %p%%' end
 
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
@@ -1012,13 +1011,13 @@ end
 -- vim: ts=2 sts=2 sw=2 et
 
 -- Brighter white text:
-vim.api.nvim_set_hl(0, "Normal", { ctermfg = 252, fg = "#d0d0d0" })
-vim.api.nvim_set_hl(0, "Comment", { ctermfg = 252, fg = "#bfbfbf" })
+vim.api.nvim_set_hl(0, 'Normal', { ctermfg = 252, fg = '#d0d0d0' })
+vim.api.nvim_set_hl(0, 'Comment', { ctermfg = 252, fg = '#bfbfbf' })
 
 -- more subtle colours for LSP highlighting:
-vim.api.nvim_set_hl(0, "LspReferenceText",  { bg = "#073642" })
-vim.api.nvim_set_hl(0, "LspReferenceRead",  { bg = "#073642" })
-vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#073642", bold = true })
+vim.api.nvim_set_hl(0, 'LspReferenceText', { bg = '#073642' })
+vim.api.nvim_set_hl(0, 'LspReferenceRead', { bg = '#073642' })
+vim.api.nvim_set_hl(0, 'LspReferenceWrite', { bg = '#073642', bold = true })
 
 -- old vimrc file (to be optimized):
 -- ============================================================================
@@ -1028,12 +1027,15 @@ vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#073642", bold = true })
 -- --- Mode switching ---------------------------------------------------------
 vim.keymap.set('i', 'jj', '<esc>l')
 vim.keymap.set('i', 'jk', '<esc>l')
+vim.keymap.set('i', 'kk', '<esc>l')
 vim.keymap.set('i', 'kj', '<esc>l')
-vim.keymap.set('v', 'jk', '<esc>')
-vim.keymap.set('v', 'kj', '<esc>')
+--vim.keymap.set('i', 'kj', '<esc>l') --disabled - exit via <escape> only
+--vim.keymap.set('v', 'jk', '<esc>')
+--vim.keymap.set('v', 'kj', '<esc>')
 vim.keymap.set('c', 'jj', '<c-c>')
 vim.keymap.set('c', 'jk', '<c-c>')
 vim.keymap.set('c', 'kj', '<c-c>')
+vim.keymap.set('c', 'kk', '<c-c>')
 
 vim.keymap.set('n', '<space>', ':')
 vim.keymap.set('v', '<space>', ':')
@@ -1054,7 +1056,7 @@ vim.keymap.set('v', '<c-c>', '"+y')
 vim.keymap.set('', '<c-p>', '"+P')
 
 -- --- Command history --------------------------------------------------------
-vim.keymap.set('n', '<leader>j', ':<c-up>')
+vim.keymap.set('n', '<leader>j', 'Show last command (:<c-up>)')
 vim.keymap.set('n', 'q<space>', 'q:')
 vim.keymap.set('n', 'q7', 'q/')
 
@@ -1066,10 +1068,9 @@ vim.keymap.set('n', '<leader>q1', ':q!<cr>')
 -- ============================================================================
 vim.keymap.set('n', 'Y', 'y$')
 
-
-for _, obj in ipairs({{'8','('}, {'7','{'}, {'9','['}, {'2','"'}}) do
-  vim.keymap.set('o', 'i'..obj[1], 'i'..obj[2])
-  vim.keymap.set('o', 'a'..obj[1], 'a'..obj[2])
+for _, obj in ipairs { { '8', '(' }, { '7', '{' }, { '9', '[' }, { '2', '"' } } do
+  vim.keymap.set('o', 'i' .. obj[1], 'i' .. obj[2])
+  vim.keymap.set('o', 'a' .. obj[1], 'a' .. obj[2])
 end
 
 -- ============================================================================
@@ -1079,9 +1080,9 @@ vim.keymap.set('n', '<c-h>', '<c-w>h')
 vim.keymap.set('n', '<c-j>', '<c-w>j')
 vim.keymap.set('n', '<c-k>', '<c-w>k')
 vim.keymap.set('n', '<c-l>', '<c-w>l')
-vim.keymap.set('n', '<c-up>',    '<c-w>+')
-vim.keymap.set('n', '<c-down>',  '<c-w>-')
-vim.keymap.set('n', '<c-left>',  '<c-w>>')
+vim.keymap.set('n', '<c-up>', '<c-w>+')
+vim.keymap.set('n', '<c-down>', '<c-w>-')
+vim.keymap.set('n', '<c-left>', '<c-w>>')
 vim.keymap.set('n', '<c-right>', '<c-w><')
 
 -- TODO: add shortcuts for window/buffer resizing
@@ -1107,23 +1108,23 @@ vim.opt.wildmode = 'list:longest'
 vim.opt.wildignore = '*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx'
 
 -- Visual selection highlight
-vim.api.nvim_set_hl(0, "Visual", { bg = "#b58900", fg = "#002b36" })
+vim.api.nvim_set_hl(0, 'Visual', { bg = '#b58900', fg = '#002b36' })
 
 -- Transparent backgrounds (zusätzliche Gruppen)
-vim.api.nvim_set_hl(0, "NonText",     { bg = "none" })
-vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "none" })
-vim.api.nvim_set_hl(0, "LineNr",      { bg = "none" })
-vim.api.nvim_set_hl(0, "FoldColumn",  { bg = "none" })
+vim.api.nvim_set_hl(0, 'NonText', { bg = 'none' })
+vim.api.nvim_set_hl(0, 'EndOfBuffer', { bg = 'none' })
+vim.api.nvim_set_hl(0, 'LineNr', { bg = 'none' })
+vim.api.nvim_set_hl(0, 'FoldColumn', { bg = 'none' })
 
 -- Statusline besser sichtbar machen
-vim.api.nvim_set_hl(0, "MiniStatuslineModeNormal",  { bg = "#268bd2", fg = "#002b36", bold = true })
-vim.api.nvim_set_hl(0, "MiniStatuslineModeInsert",  { bg = "#2aa198", fg = "#002b36", bold = true })
-vim.api.nvim_set_hl(0, "MiniStatuslineModeVisual",  { bg = "#d33682", fg = "#002b36", bold = true })
-vim.api.nvim_set_hl(0, "MiniStatuslineModeCommand", { bg = "#b58900", fg = "#002b36", bold = true })
-vim.api.nvim_set_hl(0, "MiniStatuslineModeOther",   { bg = "#859900", fg = "#002b36", bold = true })
-vim.api.nvim_set_hl(0, "MiniStatuslineFilename",    { bg = "#073642", fg = "#93a1a1" })
-vim.api.nvim_set_hl(0, "MiniStatuslineFileinfo",    { bg = "#073642", fg = "#93a1a1" })
-vim.api.nvim_set_hl(0, "MiniStatuslineInactive",    { bg = "#073642", fg = "#586e75" })
+vim.api.nvim_set_hl(0, 'MiniStatuslineModeNormal', { bg = '#268bd2', fg = '#002b36', bold = true })
+vim.api.nvim_set_hl(0, 'MiniStatuslineModeInsert', { bg = '#2aa198', fg = '#002b36', bold = true })
+vim.api.nvim_set_hl(0, 'MiniStatuslineModeVisual', { bg = '#d33682', fg = '#002b36', bold = true })
+vim.api.nvim_set_hl(0, 'MiniStatuslineModeCommand', { bg = '#b58900', fg = '#002b36', bold = true })
+vim.api.nvim_set_hl(0, 'MiniStatuslineModeOther', { bg = '#859900', fg = '#002b36', bold = true })
+vim.api.nvim_set_hl(0, 'MiniStatuslineFilename', { bg = '#073642', fg = '#93a1a1' })
+vim.api.nvim_set_hl(0, 'MiniStatuslineFileinfo', { bg = '#073642', fg = '#93a1a1' })
+vim.api.nvim_set_hl(0, 'MiniStatuslineInactive', { bg = '#073642', fg = '#586e75' })
 
 -- plugin for cursor animation:
 vim.pack.add { gh 'sphamba/smear-cursor.nvim' }
@@ -1131,21 +1132,21 @@ require('smear_cursor').setup()
 -- animationen konfigurieren!
 
 -- ─── clever-f Plugin Konfiguration ───────────────────────────────────────
-vim.pack.add({
-  "https://github.com/rhysd/clever-f.vim",
-})
+vim.pack.add {
+  'https://github.com/rhysd/clever-f.vim',
+}
 -- Suche über Zeilenenden hinaus (zeilenübergreifend)
 vim.g.clever_f_across_no_line = 0
 -- Smart case: Großbuchstabe → case-sensitiv, sonst nicht
 vim.g.clever_f_smart_case = 1
 -- ; matcht beliebige Sonderzeichen
-vim.g.clever_f_chars_match_any_signs = ";"
+vim.g.clever_f_chars_match_any_signs = ';'
 -- Zielzeichen in der aktuellen Zeile highlighten
 vim.g.clever_f_mark_char = 1
 -- Highlight-Farbe: Solarized Orange (passt zu NeoSolarized)
-vim.g.clever_f_mark_char_color = "CleverFSolarized"
-vim.api.nvim_set_hl(0, "CleverFSolarized", {
-  fg = "#cb4b16",  -- solarized orange
+vim.g.clever_f_mark_char_color = 'CleverFSolarized'
+vim.api.nvim_set_hl(0, 'CleverFSolarized', {
+  fg = '#cb4b16', -- solarized orange
   bold = true,
   underline = true,
 })
@@ -1155,45 +1156,41 @@ vim.g.clever_f_fix_key_direction = 1
 vim.g.clever_f_timeout_ms = 2000
 -- Highlight bleibt 500 ms nach dem Sprung sichtbar
 vim.g.clever_f_highlight_timeout_ms = 2000
--- f<CR> oder f<Tab> wiederholt das letzte Zeichen
-vim.g.clever_f_repeat_last_char_inputs = { "\r", "\t" }
 
 -- ─── neoscroll Plugin Konfiguration ──────────────────────────────────────
-vim.pack.add({
-  "https://github.com/karb94/neoscroll.nvim",
-})
+vim.pack.add {
+  'https://github.com/karb94/neoscroll.nvim',
+}
 
-local neoscroll = require("neoscroll")
+local neoscroll = require 'neoscroll'
 
-neoscroll.setup({
-  mappings          = {},    -- eigene Mappings unten, keine defaults
-  hide_cursor       = true,  -- Cursor während Scroll verstecken
-  stop_eof          = true,  -- nicht über Dateiende hinausscrollen
-  respect_scrolloff = true,  -- scrolloff-Margin respektieren
+neoscroll.setup {
+  mappings = {}, -- eigene Mappings unten, keine defaults
+  hide_cursor = true, -- Cursor während Scroll verstecken
+  stop_eof = true, -- nicht über Dateiende hinausscrollen
+  respect_scrolloff = true, -- scrolloff-Margin respektieren
   duration_multiplier = 1.0,
-  easing            = "sine",
-  pre_hook  = function() require("smear_cursor").enabled = false end,
-  post_hook = function() require("smear_cursor").enabled = true  end,
-})
+  easing = 'sine',
+  pre_hook = function() require('smear_cursor').enabled = false end,
+  post_hook = function() require('smear_cursor').enabled = true end,
+}
 
-local modes = { "n", "v", "x" }
+local modes = { 'n', 'v', 'x' }
 local keymap = {
   -- halbes Fenster: schnell, sine-Easing (maybe try "quadratic" as well)
-  ["<C-u>"] = function() neoscroll.ctrl_u({ duration = 200, easing = "sine" }) end,
-  ["<C-d>"] = function() neoscroll.ctrl_d({ duration = 200, easing = "sine" }) end,
+  ['<C-u>'] = function() neoscroll.ctrl_u { duration = 200, easing = 'sine' } end,
+  ['<C-d>'] = function() neoscroll.ctrl_d { duration = 200, easing = 'sine' } end,
   -- ganzes Fenster: etwas langsamer, circular für weiches Abbremsen
-  ["<C-b>"] = function() neoscroll.ctrl_b({ duration = 350, easing = "circular" }) end,
-  ["<C-f>"] = function() neoscroll.ctrl_f({ duration = 350, easing = "circular" }) end,
+  ['<C-b>'] = function() neoscroll.ctrl_b { duration = 350, easing = 'circular' } end,
+  ['<C-f>'] = function() neoscroll.ctrl_f { duration = 350, easing = 'circular' } end,
   -- zeilenweises Scrollen ohne Cursor
-  ["<C-y>"] = function() neoscroll.scroll(-2, { move_cursor = false, duration = 80 }) end,
-  ["<C-e>"] = function() neoscroll.scroll( 2, { move_cursor = false, duration = 80 }) end,
+  ['<C-y>'] = function() neoscroll.scroll(-2, { move_cursor = false, duration = 80 }) end,
+  ['<C-e>'] = function() neoscroll.scroll(2, { move_cursor = false, duration = 80 }) end,
   -- Rezentrierung
-  ["zt"]    = function() neoscroll.zt({ half_win_duration = 150 }) end,
-  ["zz"]    = function() neoscroll.zz({ half_win_duration = 150 }) end,
-  ["zb"]    = function() neoscroll.zb({ half_win_duration = 150 }) end,
+  ['zt'] = function() neoscroll.zt { half_win_duration = 250 } end,
+  ['zz'] = function() neoscroll.zz { half_win_duration = 250 } end,
+  ['zb'] = function() neoscroll.zb { half_win_duration = 250 } end,
 }
 for key, func in pairs(keymap) do
   vim.keymap.set(modes, key, func)
 end
-
-
