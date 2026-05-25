@@ -92,7 +92,9 @@ do
   -- Enable faster startup by caching compiled Lua modules
   vim.loader.enable()
 
-  -- Set <space> as the leader key - NO: Set , as the leader key
+  vim.opt.runtimepath:append("~/.local/share/nvim/site")  -- Treesitter parser path
+
+  -- Set comma as the leader key
   -- See `:help mapleader`
   --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
   vim.g.mapleader = ','
@@ -368,6 +370,9 @@ do
     -- Delay between pressing a key and opening which-key (milliseconds)
     delay = 600, --in millisec - set to sth higher so fast commands don't show a pop up
     icons = { mappings = vim.g.have_nerd_font },
+    filter = function(mapping)
+    return mapping.lhs ~= ','
+  end,
     -- Document existing key chains
     spec = {
       { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
@@ -1194,3 +1199,16 @@ local keymap = {
 for key, func in pairs(keymap) do
   vim.keymap.set(modes, key, func)
 end
+
+-- ─── fun plugin cellular-automaton ───────────────────────────────────────────
+vim.pack.add({
+  "https://github.com/Eandrju/cellular-automaton.nvim",
+})
+
+vim.keymap.set("n", "<leader>fr", "<cmd>CellularAutomaton make_it_rain<CR>",
+  { desc = "Make it Rain" })
+vim.keymap.set("n", "<leader>fg", "<cmd>CellularAutomaton game_of_life<CR>",
+  { desc = "Game of Life" })
+
+
+

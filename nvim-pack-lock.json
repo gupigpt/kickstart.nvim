@@ -14,6 +14,10 @@
       "src": "https://github.com/saghen/blink.cmp",
       "version": "1.0.0 - 2.0.0"
     },
+    "cellular-automaton.nvim": {
+      "rev": "1606e9d5d04ff254023c3f3c62842d065708d6d3",
+      "src": "https://github.com/Eandrju/cellular-automaton.nvim"
+    },
     "clever-f.vim": {
       "rev": "6a3ac5e3688598af9411ab741737f98c47370c22",
       "src": "https://github.com/rhysd/clever-f.vim"
