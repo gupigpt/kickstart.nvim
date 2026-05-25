@@ -165,7 +165,7 @@ do
   vim.o.cursorline = true
 
   -- Minimal number of screen lines to keep above and below the cursor.
-  vim.o.scrolloff = 10
+  vim.o.scrolloff = 5
 
   -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
   -- instead raise a dialog asking if you wish to save the current file(s)
@@ -1125,12 +1125,12 @@ vim.api.nvim_set_hl(0, "MiniStatuslineFilename",    { bg = "#073642", fg = "#93a
 vim.api.nvim_set_hl(0, "MiniStatuslineFileinfo",    { bg = "#073642", fg = "#93a1a1" })
 vim.api.nvim_set_hl(0, "MiniStatuslineInactive",    { bg = "#073642", fg = "#586e75" })
 
--- add plugin for cursor animation:
+-- plugin for cursor animation:
 vim.pack.add { gh 'sphamba/smear-cursor.nvim' }
 require('smear_cursor').setup()
 -- animationen konfigurieren!
 
--- ─── clever-f Konfiguration ───────────────────────────────────────
+-- ─── clever-f Plugin Konfiguration ───────────────────────────────────────
 vim.pack.add({
   "https://github.com/rhysd/clever-f.vim",
 })
@@ -1157,5 +1157,43 @@ vim.g.clever_f_timeout_ms = 2000
 vim.g.clever_f_highlight_timeout_ms = 2000
 -- f<CR> oder f<Tab> wiederholt das letzte Zeichen
 vim.g.clever_f_repeat_last_char_inputs = { "\r", "\t" }
+
+-- ─── neoscroll Plugin Konfiguration ──────────────────────────────────────
+vim.pack.add({
+  "https://github.com/karb94/neoscroll.nvim",
+})
+
+local neoscroll = require("neoscroll")
+
+neoscroll.setup({
+  mappings          = {},    -- eigene Mappings unten, keine defaults
+  hide_cursor       = true,  -- Cursor während Scroll verstecken
+  stop_eof          = true,  -- nicht über Dateiende hinausscrollen
+  respect_scrolloff = true,  -- scrolloff-Margin respektieren
+  duration_multiplier = 1.0,
+  easing            = "sine",
+  pre_hook  = function() require("smear_cursor").enabled = false end,
+  post_hook = function() require("smear_cursor").enabled = true  end,
+})
+
+local modes = { "n", "v", "x" }
+local keymap = {
+  -- halbes Fenster: schnell, sine-Easing (maybe try "quadratic" as well)
+  ["<C-u>"] = function() neoscroll.ctrl_u({ duration = 200, easing = "sine" }) end,
+  ["<C-d>"] = function() neoscroll.ctrl_d({ duration = 200, easing = "sine" }) end,
+  -- ganzes Fenster: etwas langsamer, circular für weiches Abbremsen
+  ["<C-b>"] = function() neoscroll.ctrl_b({ duration = 350, easing = "circular" }) end,
+  ["<C-f>"] = function() neoscroll.ctrl_f({ duration = 350, easing = "circular" }) end,
+  -- zeilenweises Scrollen ohne Cursor
+  ["<C-y>"] = function() neoscroll.scroll(-2, { move_cursor = false, duration = 80 }) end,
+  ["<C-e>"] = function() neoscroll.scroll( 2, { move_cursor = false, duration = 80 }) end,
+  -- Rezentrierung
+  ["zt"]    = function() neoscroll.zt({ half_win_duration = 150 }) end,
+  ["zz"]    = function() neoscroll.zz({ half_win_duration = 150 }) end,
+  ["zb"]    = function() neoscroll.zb({ half_win_duration = 150 }) end,
+}
+for key, func in pairs(keymap) do
+  vim.keymap.set(modes, key, func)
+end
 
 
