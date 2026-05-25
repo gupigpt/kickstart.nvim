@@ -1128,3 +1128,34 @@ vim.api.nvim_set_hl(0, "MiniStatuslineInactive",    { bg = "#073642", fg = "#586
 -- add plugin for cursor animation:
 vim.pack.add { gh 'sphamba/smear-cursor.nvim' }
 require('smear_cursor').setup()
+-- animationen konfigurieren!
+
+-- ─── clever-f Konfiguration ───────────────────────────────────────
+vim.pack.add({
+  "https://github.com/rhysd/clever-f.vim",
+})
+-- Suche über Zeilenenden hinaus (zeilenübergreifend)
+vim.g.clever_f_across_no_line = 0
+-- Smart case: Großbuchstabe → case-sensitiv, sonst nicht
+vim.g.clever_f_smart_case = 1
+-- ; matcht beliebige Sonderzeichen
+vim.g.clever_f_chars_match_any_signs = ";"
+-- Zielzeichen in der aktuellen Zeile highlighten
+vim.g.clever_f_mark_char = 1
+-- Highlight-Farbe: Solarized Orange (passt zu NeoSolarized)
+vim.g.clever_f_mark_char_color = "CleverFSolarized"
+vim.api.nvim_set_hl(0, "CleverFSolarized", {
+  fg = "#cb4b16",  -- solarized orange
+  bold = true,
+  underline = true,
+})
+-- f immer vorwärts, F immer rückwärts (richtungsunabhängig)
+vim.g.clever_f_fix_key_direction = 1
+-- Nach 3 Sek. Inaktivität Zustand zurücksetzen
+vim.g.clever_f_timeout_ms = 2000
+-- Highlight bleibt 500 ms nach dem Sprung sichtbar
+vim.g.clever_f_highlight_timeout_ms = 2000
+-- f<CR> oder f<Tab> wiederholt das letzte Zeichen
+vim.g.clever_f_repeat_last_char_inputs = { "\r", "\t" }
+
+

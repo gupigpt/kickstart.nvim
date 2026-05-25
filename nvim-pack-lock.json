@@ -14,6 +14,10 @@
       "src": "https://github.com/saghen/blink.cmp",
       "version": "1.0.0 - 2.0.0"
     },
+    "clever-f.vim": {
+      "rev": "6a3ac5e3688598af9411ab741737f98c47370c22",
+      "src": "https://github.com/rhysd/clever-f.vim"
+    },
     "conform.nvim": {
       "rev": "18aeab3d63d350dcf44d64c462cc489a3412af40",
       "src": "https://github.com/stevearc/conform.nvim"
