@@ -92,7 +92,7 @@ do
   -- Enable faster startup by caching compiled Lua modules
   vim.loader.enable()
 
-  vim.opt.runtimepath:append("~/.local/share/nvim/site")  -- Treesitter parser path
+  vim.opt.runtimepath:append '~/.local/share/nvim/site' -- Treesitter parser path
 
   -- Set comma as the leader key
   -- See `:help mapleader`
@@ -111,7 +111,6 @@ do
   -- Make line numbers default
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
-  --  Experiment for yourself to see if you like it!
   vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
@@ -178,8 +177,16 @@ do
   --  See `:help vim.keymap.set()`
 
   -- Clear highlights on search when pressing <Esc> in normal mode
-  --  See `:help hlsearch`
   vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+  -- File operations
+  vim.keymap.set('n', '<leader>w', '<cmd>w<CR>', { desc = 'Write buffer' })
+  vim.keymap.set('n', '<leader>q', '<cmd>q<CR>', { desc = 'Quit' })
+  vim.keymap.set('n', '<leader>x', '<cmd>x<CR>', { desc = 'Write and quit' })
+  vim.keymap.set('n', '<leader>e', '<cmd>e!<CR>', { desc = 'Reload file' })
+
+  -- Diagnostic keymaps
+  vim.keymap.set('n', '<leader>d', vim.diagnostic.setloclist, { desc = 'Open diagnostic list' })
 
   -- Diagnostic Config & Keymaps
   --  See `:help vim.diagnostic.Opts`
@@ -204,8 +211,6 @@ do
       end,
     },
   }
-
-  vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
   -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
   -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -370,16 +375,14 @@ do
     -- Delay between pressing a key and opening which-key (milliseconds)
     delay = 600, --in millisec - set to sth higher so fast commands don't show a pop up
     icons = { mappings = vim.g.have_nerd_font },
-    filter = function(mapping)
-    return mapping.lhs ~= ','
-  end,
+    filter = function(mapping) return mapping.lhs ~= ',' end,
     -- Document existing key chains
     spec = {
       { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
       { '<leader>t', group = '[T]oggle' },
       { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
       { 'gr', group = 'LSP Actions', mode = { 'n' } },
-      { '<leader>f', group = 'Fun' }, -- für cellular-automaton
+      { '<leader>g', group = 'Games' }, -- für cellular-automaton
     },
   }
 
@@ -838,7 +841,7 @@ do
     },
   }
 
-  vim.keymap.set({ 'n', 'v' }, '<leader>f', function() require('conform').format { async = true } end, { desc = '[F]ormat buffer' })
+  vim.keymap.set({ 'n', 'v' }, '<leader>f', function() require('conform').format { async = true } end, { desc = 'Format buffer' })
 end
 
 -- ============================================================
@@ -1024,6 +1027,10 @@ vim.api.nvim_set_hl(0, 'LspReferenceText', { bg = '#073642' })
 vim.api.nvim_set_hl(0, 'LspReferenceRead', { bg = '#073642' })
 vim.api.nvim_set_hl(0, 'LspReferenceWrite', { bg = '#073642', bold = true })
 
+-- Show a cyan line for vertically splitted windows
+vim.api.nvim_set_hl(0, 'WinSeparator', { fg = '#2aa198', bg = 'none' })
+
+
 -- old vimrc file (to be optimized):
 -- ============================================================================
 -- KEY MAPPINGS
@@ -1156,10 +1163,10 @@ vim.api.nvim_set_hl(0, 'CleverFSolarized', {
   underline = true,
 })
 -- f immer vorwärts, F immer rückwärts (richtungsunabhängig)
-vim.g.clever_f_fix_key_direction = 1
--- Nach 3 Sek. Inaktivität Zustand zurücksetzen
+--vim.g.clever_f_fix_key_direction = 1
+-- Nach 2 Sek. Inaktivität Zustand zurücksetzen
 vim.g.clever_f_timeout_ms = 2000
--- Highlight bleibt 500 ms nach dem Sprung sichtbar
+-- Highlight bleibt 2 Sek. nach dem Sprung sichtbar
 vim.g.clever_f_highlight_timeout_ms = 2000
 
 -- ─── neoscroll Plugin Konfiguration ──────────────────────────────────────
@@ -1201,14 +1208,9 @@ for key, func in pairs(keymap) do
 end
 
 -- ─── fun plugin cellular-automaton ───────────────────────────────────────────
-vim.pack.add({
-  "https://github.com/Eandrju/cellular-automaton.nvim",
-})
+vim.pack.add {
+  'https://github.com/Eandrju/cellular-automaton.nvim',
+}
 
-vim.keymap.set("n", "<leader>fr", "<cmd>CellularAutomaton make_it_rain<CR>",
-  { desc = "Make it Rain" })
-vim.keymap.set("n", "<leader>fg", "<cmd>CellularAutomaton game_of_life<CR>",
-  { desc = "Game of Life" })
-
-
-
+vim.keymap.set('n', '<leader>gr', '<cmd>CellularAutomaton make_it_rain<CR>', { desc = 'Make it Rain' })
+vim.keymap.set('n', '<leader>gg', '<cmd>CellularAutomaton game_of_life<CR>', { desc = 'Game of Life' })
