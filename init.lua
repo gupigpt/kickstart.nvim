@@ -478,12 +478,75 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
   ---@diagnostic disable-next-line: duplicate-set-field
 
   -- rechte Seite der status bar wie in vim gestalten:
-  -- statusline.section_location = function() return '%2l:%-2v' end
-  statusline.section_location = function() return 'row: %l  col: %c  progress: %p%%' end
+  --statusline.section_location = function() return '%2l:%-2v' end
+  --statusline.section_location = function() return 'row: %l  col: %c  progress: %p%%' end
+
+  -- Winbar: absoluter Pfad + modified flag
+  vim.o.winbar = ' %F %m'
+
+  -- eine einzige Statusline ganz unten
+  vim.o.laststatus = 3
+  -- Statusline content
+  statusline.set_content = function()
+    local mode, mode_hl = statusline.section_mode { trunc_width = 120 }
+
+    -- Git branch via gitsigns
+    local branch = vim.b.gitsigns_head or ''
+    local git = branch ~= '' and (' ' .. branch) or ''
+
+    -- LSP clients
+    local clients = vim.lsp.get_clients { bufnr = 0 }
+    local lsp = ''
+    if #clients > 0 then
+      local names = {}
+      for _, c in ipairs(clients) do
+        table.insert(names, c.name)
+      end
+      lsp = '󰒋 ' .. table.concat(names, ', ')
+    end
+
+    -- Encoding + Filetype
+    local enc = vim.bo.fileencoding ~= '' and vim.bo.fileencoding or vim.o.encoding
+    local ft = vim.bo.filetype ~= '' and vim.bo.filetype or 'no ft'
+    local fileinfo = string.format('%s  %s', enc, ft)
+
+    -- Location
+    local location = string.format('row: %d  col: %d  %d%%', vim.fn.line '.', vim.fn.col '.', math.floor(vim.fn.line '.' / vim.fn.line '$' * 100))
+
+    return statusline.combine_groups {
+      { hl = mode_hl, strings = { mode } },
+      { hl = 'MiniStatuslineDevinfo', strings = { git } },
+      { hl = 'MiniStatuslineDevinfo', strings = { lsp } },
+      '%<',
+      { hl = 'MiniStatuslineFilename', strings = { '%t' } },
+      '%=',
+      { hl = 'MiniStatuslineFileinfo', strings = { fileinfo } },
+      { hl = mode_hl, strings = { location } },
+    }
+  end
 
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
 end
+
+-- ─── colorful-winsep ─────────────────────────────────────────────────────────
+vim.pack.add { gh 'nvim-zh/colorful-winsep.nvim' }
+require('colorful-winsep').setup {
+  border = 'rounded',
+  highlight = '#2aa198', -- cyan colored
+  excluded_ft = { 'TelescopePrompt', 'mason' },
+  animate = {
+    enabled = 'progressive',
+    progressive = {
+      delay = 16,
+      vertical_lerp_factor = 0.15, -- zwischen 0 und 1, höher = schneller
+      horizontal_lerp_factor = 0.15,
+    },
+  },
+  indicator_for_2wins = {
+    position = 'center',
+  },
+}
 
 -- ============================================================
 -- SECTION 4: SEARCH & NAVIGATION
@@ -1028,8 +1091,12 @@ vim.api.nvim_set_hl(0, 'LspReferenceRead', { bg = '#073642' })
 vim.api.nvim_set_hl(0, 'LspReferenceWrite', { bg = '#073642', bold = true })
 
 -- Show a cyan line for vertically splitted windows
-vim.api.nvim_set_hl(0, 'WinSeparator', { fg = '#2aa198', bg = 'none' })
+--vim.api.nvim_set_hl(0, 'WinSeparator', { fg = '#2aa198', bg = 'none' })
 
+-- Winbar style:
+-- mit grünem Akzent passend zu deinen Telescope-Borders
+vim.api.nvim_set_hl(0, 'WinBar',   { bg = '#073642', fg = '#859900' })
+vim.api.nvim_set_hl(0, 'WinBarNC', { bg = '#073642', fg = '#93a1a1' })
 
 -- old vimrc file (to be optimized):
 -- ============================================================================
