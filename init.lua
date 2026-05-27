@@ -384,6 +384,12 @@ do
   -- Adds git related signs to the gutter, as well as utilities for managing changes
   vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
   require('gitsigns').setup {
+    current_line_blame = true, -- Show inline git blame
+    current_line_blame_opts = {
+      delay = 800, -- ms bis es erscheint
+      virt_text_pos = 'right_align', -- Show the blame on the right - other option "eol" to show directly after the code
+    },
+    current_line_blame_formatter = '  <author>, <author_time:%d.%m.%Y> · <summary>',
     signs = {
       add = { text = '+' }, ---@diagnostic disable-line: missing-fields
       change = { text = '~' }, ---@diagnostic disable-line: missing-fields
@@ -391,7 +397,20 @@ do
       topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
       changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
     },
+    on_attach = function(bufnr)
+      local gs = package.loaded.gitsigns
+      vim.keymap.set('n', '<leader>hs', gs.stage_hunk, { buffer = bufnr, desc = 'Stage hunk' })
+      vim.keymap.set('n', '<leader>hr', gs.reset_hunk, { buffer = bufnr, desc = 'Reset hunk' })
+      vim.keymap.set('n', '<leader>hp', gs.preview_hunk, { buffer = bufnr, desc = 'Preview hunk' })
+      vim.keymap.set('n', '<leader>hb', gs.blame_line, { buffer = bufnr, desc = 'Blame line' })
+      vim.keymap.set('n', '<leader>hd', gs.diffthis, { buffer = bufnr, desc = 'Diff this' })
+      vim.keymap.set('n', '<leader>hn', gs.next_hunk, { buffer = bufnr, desc = 'Go to next hunk' })
+      vim.keymap.set('n', '<leader>hN', gs.prev_hunk, { buffer = bufnr, desc = 'Go to previous hunk' })
+    end,
   }
+
+  -- Very weak grey color for inline blames:
+  vim.api.nvim_set_hl(0, 'GitSignsCurrentLineBlame', { fg = '#253535', italic = true }) --try also #1d3030 or #3d5a5a
 
   -- Useful plugin to show you pending keybinds.
   vim.pack.add { gh 'folke/which-key.nvim' }
@@ -415,7 +434,7 @@ do
     spec = {
       { '<leader>s', group = 'Search', mode = { 'n', 'v' } },
       { '<leader>t', group = 'Toggle' },
-      { '<leader>h', group = 'Git Hunks', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
+      { '<leader>h', group = 'Git Hunks', mode = { 'n', 'v' } },
       { '<leader>d', group = 'Diagnostics' },
       { '<leader>g', group = 'Git' },
       { 'gr', group = 'LSP' },
@@ -429,6 +448,42 @@ do
   vim.api.nvim_set_hl(0, 'WhichKeySeparator', { fg = '#586e75' }) -- Pfeil
   vim.api.nvim_set_hl(0, 'WhichKeyFloat', { bg = '#073642' }) -- Hintergrund
   vim.api.nvim_set_hl(0, 'WhichKeyBorder', { bg = '#073642', fg = '#859900' })
+
+
+-- Show number of occurrences when searching for sth
+vim.pack.add { gh 'kevinhwang91/nvim-hlslens' }
+require('hlslens').setup {
+  calm_down = true, -- highlight verschwindet wenn Cursor sich bewegt
+  nearest_only = true, -- nur aktuellen Treffer hervorheben
+  nearest_float_when = 'never',
+}
+
+vim.api.nvim_create_autocmd('ColorScheme', {
+  pattern = '*',
+  callback = function()
+    vim.api.nvim_set_hl(0, 'HlSearchNear',     { fg = '#002b36', bg = '#859900', bold = true })
+    vim.api.nvim_set_hl(0, 'HlSearchLens',     { fg = '#859900', bg = 'none' })
+    vim.api.nvim_set_hl(0, 'HlSearchLensNear', { fg = '#93a1a1', bg = 'none', bold = true })
+    vim.api.nvim_set_hl(0, 'HlSearchFloat',    { fg = '#002b36', bg = '#859900' })
+    vim.api.nvim_set_hl(0, 'Search',           { fg = '#002b36', bg = '#b58900' })
+    vim.api.nvim_set_hl(0, 'IncSearch',        { fg = '#002b36', bg = '#859900', bold = true })
+  end,
+})
+
+-- n/N Mappings ersetzen:
+vim.keymap.set('n', 'n', function()
+  vim.cmd 'normal! n'
+  require('hlslens').start()
+  local count = vim.fn.searchcount { maxcount = 0 }
+  if count.total > 0 then vim.notify(string.format('%d/%d', count.current, count.total), vim.log.levels.INFO) end
+end)
+vim.keymap.set('n', 'N', function()
+  vim.cmd 'normal! N'
+  require('hlslens').start()
+  local count = vim.fn.searchcount { maxcount = 0 }
+  if count.total > 0 then vim.notify(string.format('%d/%d', count.current, count.total), vim.log.levels.INFO) end
+end)
+
 
   -- [[ Colorscheme ]]
   -- You can easily change to a different colorscheme.
@@ -467,8 +522,8 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 --]]
 
   -- Telescope popup – abgestimmt auf NeoSolarized dark
-  --vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = '#073642' }) -- Solarized base03, etwas heller als Hintergrund
-  vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = '#0a3040' })
+  vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = '#073642' }) -- Solarized base03, etwas heller als Hintergrund
+  --vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = '#0a3040' })
   vim.api.nvim_set_hl(0, 'TelescopeBorder', { bg = '#073642', fg = '#859900' }) -- grüner Rand
   --vim.api.nvim_set_hl(0, 'TelescopePromptNormal', { bg = '#0a4050' }) -- minimal heller
   vim.api.nvim_set_hl(0, 'TelescopePromptNormal', { bg = '#0d3d50' })
@@ -759,6 +814,11 @@ do
   -- Shortcut for searching your Neovim configuration files
   vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
 end
+
+-- Farben passend zu Solarized:
+vim.api.nvim_set_hl(0, 'HlSearchNear', { fg = '#002b36', bg = '#859900', bold = true })
+vim.api.nvim_set_hl(0, 'HlSearchLens', { fg = '#586e75', bg = 'none' })
+vim.api.nvim_set_hl(0, 'HlSearchLensNear', { fg = '#93a1a1', bg = 'none', bold = true })
 
 -- ============================================================
 -- SECTION 5: LSP
@@ -1147,7 +1207,6 @@ do
   -- require 'kickstart.plugins.lint'
   -- require 'kickstart.plugins.autopairs'
   -- require 'kickstart.plugins.neo-tree'
-  -- require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --
