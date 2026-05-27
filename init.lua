@@ -486,15 +486,22 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 
   -- eine einzige Statusline ganz unten
   vim.o.laststatus = 3
+  --
   -- Statusline content
-  statusline.set_content = function()
+  statusline.active = function()
     local mode, mode_hl = statusline.section_mode { trunc_width = 120 }
 
-    -- Git branch via gitsigns
+    -- Git branch + changes (via gitsigns plugin)
     local branch = vim.b.gitsigns_head or ''
     local git = branch ~= '' and (' ' .. branch) or ''
 
-    -- LSP clients
+    local gs = vim.b.gitsigns_status_dict or {}
+    local changes = ''
+    if gs.added and gs.added > 0 then changes = changes .. ' +' .. gs.added end
+    if gs.changed and gs.changed > 0 then changes = changes .. ' ~' .. gs.changed end
+    if gs.removed and gs.removed > 0 then changes = changes .. ' -' .. gs.removed end
+
+    -- LSP + Diagnostics
     local clients = vim.lsp.get_clients { bufnr = 0 }
     local lsp = ''
     if #clients > 0 then
@@ -504,6 +511,7 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
       end
       lsp = '󰒋 ' .. table.concat(names, ', ')
     end
+    local diagnostics = statusline.section_diagnostics { trunc_width = 75 }
 
     -- Encoding + Filetype
     local enc = vim.bo.fileencoding ~= '' and vim.bo.fileencoding or vim.o.encoding
@@ -511,16 +519,16 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
     local fileinfo = string.format('%s  %s', enc, ft)
 
     -- Location
-    local location = string.format('row: %d  col: %d  %d%%', vim.fn.line '.', vim.fn.col '.', math.floor(vim.fn.line '.' / vim.fn.line '$' * 100))
+    local location = string.format('row: %d  col: %d  %d%%%%', vim.fn.line '.', vim.fn.col '.', math.floor(vim.fn.line '.' / vim.fn.line '$' * 100))
 
     return statusline.combine_groups {
       { hl = mode_hl, strings = { mode } },
-      { hl = 'MiniStatuslineDevinfo', strings = { git } },
-      { hl = 'MiniStatuslineDevinfo', strings = { lsp } },
+      { hl = 'MiniStatuslineDevinfo', strings = { git, changes } },
+      { hl = 'MiniStatuslineDevinfo', strings = { lsp, diagnostics } },
       '%<',
       { hl = 'MiniStatuslineFilename', strings = { '%t' } },
       '%=',
-      { hl = 'MiniStatuslineFileinfo', strings = { fileinfo } },
+      { hl = 'MiniStatuslineFileinfo', strings = { enc .. '  ' .. ft } },
       { hl = mode_hl, strings = { location } },
     }
   end
@@ -1095,7 +1103,7 @@ vim.api.nvim_set_hl(0, 'LspReferenceWrite', { bg = '#073642', bold = true })
 
 -- Winbar style:
 -- mit grünem Akzent passend zu deinen Telescope-Borders
-vim.api.nvim_set_hl(0, 'WinBar',   { bg = '#073642', fg = '#859900' })
+vim.api.nvim_set_hl(0, 'WinBar', { bg = '#073642', fg = '#859900' })
 vim.api.nvim_set_hl(0, 'WinBarNC', { bg = '#073642', fg = '#93a1a1' })
 
 -- old vimrc file (to be optimized):
@@ -1180,7 +1188,7 @@ vim.opt.history = 1000
 
 -- Editing
 vim.opt.wrap = false
-vim.opt.whichwrap = 'b,s,<,>,[,]'
+vim.opt.whichwrap = 'b,s,h,l,<,>,[,]'
 
 -- Wildmenu / Completion
 vim.opt.wildmode = 'list:longest'
