@@ -186,14 +186,31 @@ do
   vim.keymap.set('n', '<leader>e', '<cmd>e!<CR>', { desc = 'Reload file' })
 
   -- Diagnostic keymaps
-  vim.keymap.set('n', '<leader>d', vim.diagnostic.setloclist, { desc = 'Open diagnostic list' })
+  vim.keymap.set('n', '<leader>dd', vim.diagnostic.setloclist, { desc = 'Open diagnostic list' })
+  vim.keymap.set('n', '<leader>dc', function() vim.diagnostic.open_float { scope = 'cursor', focus = false } end, { desc = 'Show current diagnostic' })
+  --
+  -- Go to previous/next diagnostic warning/hint/error etc:
+  vim.keymap.set('n', '<leader>dn', function()
+    vim.diagnostic.jump { count = 1 }
+    vim.diagnostic.open_float { scope = 'cursor', focus = false }
+  end, { desc = 'Go to next diagnostic' })
+
+  vim.keymap.set('n', '<leader>dp', function()
+    vim.diagnostic.jump { count = -1 }
+    vim.diagnostic.open_float { scope = 'cursor', focus = false }
+  end, { desc = 'Go to previous diagnostic' })
 
   -- Diagnostic Config & Keymaps
   --  See `:help vim.diagnostic.Opts`
   vim.diagnostic.config {
     update_in_insert = false,
     severity_sort = true,
-    float = { border = 'rounded', source = 'if_many' },
+    float = {
+      border = 'rounded',
+      source = 'if_many',
+      header = 'Diagnostics', -- kein "Diagnostics:" Header
+      prefix = ' ', -- kleines Symbol vor jeder Meldung
+    },
     underline = { severity = { min = vim.diagnostic.severity.WARN } },
 
     -- Can switch between these as you prefer
@@ -253,6 +270,13 @@ do
     callback = function() vim.hl.on_yank() end,
   })
 end
+
+-- Diagnostic Float bei Cursor-Hover
+vim.api.nvim_create_autocmd('CursorHold', {
+  desc = 'Show diagnostic float on cursor hold',
+  group = vim.api.nvim_create_augroup('kickstart-diagnostic-hover', { clear = true }),
+  callback = function() vim.diagnostic.open_float { scope = 'cursor', focus = false } end,
+})
 
 -- ============================================================
 -- SECTION 2: PLUGIN MANAGER INTRO
@@ -376,15 +400,35 @@ do
     delay = 600, --in millisec - set to sth higher so fast commands don't show a pop up
     icons = { mappings = vim.g.have_nerd_font },
     filter = function(mapping) return mapping.lhs ~= ',' end,
-    -- Document existing key chains
+    layout = {
+      width = { min = 20, max = 50 },
+      spacing = 3,
+    },
+    win = {
+      border = 'rounded',
+      padding = { 1, 2 },
+      -- Transparent background (like telescope):
+      -- wo = {
+      -- winblend = 15,
+      -- },
+    },
     spec = {
-      { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
-      { '<leader>t', group = '[T]oggle' },
-      { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
-      { 'gr', group = 'LSP Actions', mode = { 'n' } },
-      { '<leader>g', group = 'Games' }, -- für cellular-automaton
+      { '<leader>s', group = 'Search', mode = { 'n', 'v' } },
+      { '<leader>t', group = 'Toggle' },
+      { '<leader>h', group = 'Git Hunks', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
+      { '<leader>d', group = 'Diagnostics' },
+      { '<leader>g', group = 'Git' },
+      { 'gr', group = 'LSP' },
+      { '<leader>z', group = 'Games' }, -- für cellular-automaton
     },
   }
+  -- Which-key popup menu design:
+  vim.api.nvim_set_hl(0, 'WhichKey', { fg = '#859900' }) -- Taste
+  vim.api.nvim_set_hl(0, 'WhichKeyDesc', { fg = '#93a1a1' }) -- Beschreibung
+  vim.api.nvim_set_hl(0, 'WhichKeyGroup', { fg = '#268bd2', bold = true }) -- Gruppe
+  vim.api.nvim_set_hl(0, 'WhichKeySeparator', { fg = '#586e75' }) -- Pfeil
+  vim.api.nvim_set_hl(0, 'WhichKeyFloat', { bg = '#073642' }) -- Hintergrund
+  vim.api.nvim_set_hl(0, 'WhichKeyBorder', { bg = '#073642', fg = '#859900' })
 
   -- [[ Colorscheme ]]
   -- You can easily change to a different colorscheme.
@@ -423,9 +467,11 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 --]]
 
   -- Telescope popup – abgestimmt auf NeoSolarized dark
-  vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = '#073642' }) -- Solarized base03, etwas heller als Hintergrund
+  --vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = '#073642' }) -- Solarized base03, etwas heller als Hintergrund
+  vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = '#0a3040' })
   vim.api.nvim_set_hl(0, 'TelescopeBorder', { bg = '#073642', fg = '#859900' }) -- grüner Rand
-  vim.api.nvim_set_hl(0, 'TelescopePromptNormal', { bg = '#0a4050' }) -- minimal heller
+  --vim.api.nvim_set_hl(0, 'TelescopePromptNormal', { bg = '#0a4050' }) -- minimal heller
+  vim.api.nvim_set_hl(0, 'TelescopePromptNormal', { bg = '#0d3d50' })
   vim.api.nvim_set_hl(0, 'TelescopePromptBorder', { bg = '#0a4050', fg = '#859900' }) -- auch grün
   vim.api.nvim_set_hl(0, 'TelescopePromptTitle', { bg = '#859900', fg = '#002b36' }) -- grüner Titel
   vim.api.nvim_set_hl(0, 'TelescopeResultsNormal', { bg = '#073642' })
@@ -435,6 +481,18 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
   vim.api.nvim_set_hl(0, 'TelescopeSelection', { bg = '#0d4a5a', bold = true }) -- Auswahl-Zeile
   vim.api.nvim_set_hl(0, 'TelescopeSelectionCaret', { fg = '#859900' })
 
+  --
+  -- Design of the float box (for errors, hints etc)
+  vim.api.nvim_set_hl(0, 'NormalFloat', { bg = '#073642' })
+  vim.api.nvim_set_hl(0, 'FloatBorder', { bg = '#073642', fg = '#859900' })
+  vim.api.nvim_set_hl(0, 'FloatTitle', { bg = '#859900', fg = '#002b36', bold = true })
+
+  vim.api.nvim_set_hl(0, 'DiagnosticError', { fg = '#dc322f' }) -- Solarized red
+  vim.api.nvim_set_hl(0, 'DiagnosticWarn', { fg = '#b58900' }) -- Solarized yellow
+  vim.api.nvim_set_hl(0, 'DiagnosticHint', { fg = '#2aa198' }) -- Solarized cyan
+  vim.api.nvim_set_hl(0, 'DiagnosticInfo', { fg = '#268bd2' }) -- Solarized blue
+
+  --
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
   require('todo-comments').setup { signs = false }
@@ -607,6 +665,17 @@ do
     --   },
     -- },
     -- pickers = {}
+    defaults = {
+      winblend = 15,
+      borderchars = { '─', '│', '─', '│', '╭', '╮', '╯', '╰' },
+      prompt_prefix = ' ',
+      selection_caret = ' ',
+      layout_config = {
+        horizontal = {
+          preview_width = 0.55,
+        },
+      },
+    },
     extensions = {
       ['ui-select'] = { require('telescope.themes').get_dropdown() },
     },
