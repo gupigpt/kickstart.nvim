@@ -180,10 +180,7 @@ do
   vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
   -- File operations
-  vim.keymap.set('n', '<leader>w', '<cmd>w<CR>', { desc = 'Write buffer' })
-  vim.keymap.set('n', '<leader>q', '<cmd>q<CR>', { desc = 'Quit' })
-  vim.keymap.set('n', '<leader>x', '<cmd>x<CR>', { desc = 'Write and quit' })
-  vim.keymap.set('n', '<leader>e', '<cmd>e!<CR>', { desc = 'Reload file' })
+  vim.keymap.set('n', '<leader>r', '<cmd>e!<CR>', { desc = 'Reload file' })
 
   -- Diagnostic keymaps
   vim.keymap.set('n', '<leader>dd', vim.diagnostic.setloclist, { desc = 'Open diagnostic list' })
@@ -437,6 +434,8 @@ do
       { '<leader>h', group = 'Git Hunks', mode = { 'n', 'v' } },
       { '<leader>d', group = 'Diagnostics' },
       { '<leader>g', group = 'Git' },
+      { '<leader>n', group = 'Neo-tree' },
+      { '<leader>o', group = 'Oil' },
       { 'gr', group = 'LSP' },
       { '<leader>z', group = 'Games' }, -- für cellular-automaton
     },
@@ -469,38 +468,37 @@ do
   vim.pack.add { gh 'Tsuzat/NeoSolarized.nvim' }
   require('NeoSolarized').setup {
     style = 'dark',
-  transparent = true,
-}
-vim.cmd.colorscheme 'NeoSolarized'
+    transparent = true,
+  }
+  vim.cmd.colorscheme 'NeoSolarized'
 
--- ─── nvim-hlslens ────────────────────────────────────────────────────────────
-vim.pack.add { gh 'kevinhwang91/nvim-hlslens' }
-require('hlslens').setup {
-calm_down = true,
-nearest_only = true,
-nearest_float_when = 'auto', -- if line is too long, show in a float box
-}
+  -- ─── nvim-hlslens ────────────────────────────────────────────────────────────
+  vim.pack.add { gh 'kevinhwang91/nvim-hlslens' }
+  require('hlslens').setup {
+    calm_down = true,
+    nearest_only = true,
+    nearest_float_when = 'auto', -- if line is too long, show in a float box
+  }
 
--- Farben nach colorscheme setzen (sonst werden sie überschrieben):
-vim.api.nvim_set_hl(0, 'HlSearchNear',     { fg = '#002b36', bg = '#859900', bold = true })
-vim.api.nvim_set_hl(0, 'HlSearchLens',     { fg = '#2aa198' })
-vim.api.nvim_set_hl(0, 'HlSearchLensNear', { fg = '#859900', bold = true })
-vim.api.nvim_set_hl(0, 'Search',           { fg = '#002b36', bg = '#b58900' })
-vim.api.nvim_set_hl(0, 'IncSearch',        { fg = '#002b36', bg = '#859900', bold = true })
+  -- Farben nach colorscheme setzen (sonst werden sie überschrieben):
+  vim.api.nvim_set_hl(0, 'HlSearchNear', { fg = '#002b36', bg = '#859900', bold = true })
+  vim.api.nvim_set_hl(0, 'HlSearchLens', { fg = '#2aa198' })
+  vim.api.nvim_set_hl(0, 'HlSearchLensNear', { fg = '#859900', bold = true })
+  vim.api.nvim_set_hl(0, 'Search', { fg = '#002b36', bg = '#b58900' })
+  vim.api.nvim_set_hl(0, 'IncSearch', { fg = '#002b36', bg = '#859900', bold = true })
 
--- n/N Mappings:
-vim.keymap.set('n', 'n', function()
-  vim.cmd('normal! ' .. vim.v.count1 .. 'n')
-  require('hlslens').start()
-end)
-vim.keymap.set('n', 'N', function()
-  vim.cmd('normal! ' .. vim.v.count1 .. 'N')
-  require('hlslens').start()
-end)
--- hlslens auch für * und # aktivieren:
-vim.keymap.set('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]])
-vim.keymap.set('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]])
-
+  -- n/N Mappings:
+  vim.keymap.set('n', 'n', function()
+    vim.cmd('normal! ' .. vim.v.count1 .. 'n')
+    require('hlslens').start()
+  end)
+  vim.keymap.set('n', 'N', function()
+    vim.cmd('normal! ' .. vim.v.count1 .. 'N')
+    require('hlslens').start()
+  end)
+  -- hlslens auch für * und # aktivieren:
+  vim.keymap.set('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]])
+  vim.keymap.set('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]])
 
   -- remove current line coloring
   vim.api.nvim_set_hl(0, 'CursorLine', { bg = 'none' })
@@ -1211,6 +1209,220 @@ end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- ============================================================
+-- SECTION 10: FILE MANAGEMENT
+-- oil.nvim + neo-tree
+-- ============================================================
+
+-- ─── oil.nvim ────────────────────────────────────────────────────────────────
+vim.pack.add { gh 'stevearc/oil.nvim' }
+require('oil').setup {
+  -- Dateiberechtigungen anzeigen
+  columns = { 'icon', 'permissions', 'size', 'mtime' },
+  -- Versteckte Dateien anzeigen
+  view_options = {
+    show_hidden = true,
+  },
+  win_options = {
+    wrap = false,
+    signcolumn = 'yes',
+    cursorcolumn = false,
+    foldcolumn = '0',
+    spell = false,
+    list = false,
+    conceallevel = 3,
+    concealcursor = 'nvic',
+    signcolumn = 'yes:2', -- statt 'yes' — Platz für zwei Git-Status Spalten
+  },
+  -- Floating window statt split
+  float = {
+    padding = 2,
+    max_width = 80,
+    max_height = 30,
+    border = 'rounded',
+    win_options = {
+      winblend = 10,
+    },
+    override = function(conf)
+      conf.zindex = 50
+      return conf
+    end,
+  },
+  keymaps = {
+    ['<CR>'] = 'actions.select', -- CR = carriage return = enter key
+    ['<C-l>'] = { 'actions.select', opts = { vertical = true }, desc = 'Open in vertical split' },
+    ['<C-j>'] = { 'actions.select', opts = { horizontal = true }, desc = 'Open in horizontal split' },
+    ['<C-t>'] = { 'actions.select', opts = { tab = true }, desc = 'Open in new tab' },
+    ['<BS>'] = 'actions.parent', -- go up to parent dir (BS = backspace)
+    ['-'] = 'actions.parent',
+    ['q'] = 'actions.close',
+    ['.'] = 'actions.toggle_hidden',
+    ['s'] = 'actions.change_sort',
+    ['?'] = 'actions.show_help',
+    ['ß'] = 'actions.show_help',
+    ['_'] = 'actions.open_cwd',
+    ['`'] = 'actions.cd',
+  },
+  use_default_keymaps = false,
+}
+
+-- n/N in Oil deaktivieren (Konflikt mit hlslens)
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'oil',
+  group = vim.api.nvim_create_augroup('oil-keymaps', { clear = true }),
+  callback = function()
+    vim.keymap.set('n', 'n', 'n', { buffer = true, nowait = true })
+    vim.keymap.set('n', 'N', 'N', { buffer = true, nowait = true })
+  end,
+})
+
+-- Show git status in oil via plugin:
+vim.pack.add { gh 'refractalize/oil-git-status.nvim' }
+require('oil-git-status').setup {
+  show_ignored = false, -- keine !! für gitignore-Dateien
+}
+
+-- Farben passend zu Solarized:
+vim.api.nvim_set_hl(0, 'OilGitStatusIndexModified', { fg = '#b58900' })
+vim.api.nvim_set_hl(0, 'OilGitStatusWorkingTreeModified', { fg = '#b58900' })
+vim.api.nvim_set_hl(0, 'OilGitStatusIndexAdded', { fg = '#859900' })
+vim.api.nvim_set_hl(0, 'OilGitStatusWorkingTreeAdded', { fg = '#859900' })
+vim.api.nvim_set_hl(0, 'OilGitStatusIndexDeleted', { fg = '#dc322f' })
+vim.api.nvim_set_hl(0, 'OilGitStatusWorkingTreeDeleted', { fg = '#dc322f' })
+vim.api.nvim_set_hl(0, 'OilGitStatusIndexUntracked', { fg = '#2aa198' })
+vim.api.nvim_set_hl(0, 'OilGitStatusWorkingTreeUntracked', { fg = '#2aa198' })
+vim.api.nvim_set_hl(0, 'OilGitStatusIndexRenamed', { fg = '#268bd2' })
+vim.api.nvim_set_hl(0, 'OilGitStatusWorkingTreeRenamed', { fg = '#268bd2' })
+
+-- Cyan border for oil float box:
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'oil',
+  callback = function() vim.api.nvim_set_hl(0, 'FloatBorder', { fg = '#2aa198', bg = '#073642' }) end,
+})
+
+-- Oil öffnen: aktuelles Verzeichnis als floating window
+vim.keymap.set('n', '<leader>o', function() require('oil').open_float() end, { desc = 'Open Oil (float)' })
+
+-- Oil Farben passend zu Solarized:
+vim.api.nvim_set_hl(0, 'OilDir', { fg = '#268bd2', bold = true })
+vim.api.nvim_set_hl(0, 'OilFile', { fg = '#93a1a1' })
+vim.api.nvim_set_hl(0, 'OilLink', { fg = '#2aa198', italic = true })
+vim.api.nvim_set_hl(0, 'OilPermRead', { fg = '#859900' })
+vim.api.nvim_set_hl(0, 'OilPermWrite', { fg = '#cb4b16' })
+vim.api.nvim_set_hl(0, 'OilPermExec', { fg = '#b58900' })
+vim.api.nvim_set_hl(0, 'OilSize', { fg = '#586e75' })
+vim.api.nvim_set_hl(0, 'OilMtime', { fg = '#586e75' })
+
+-- ─── neo-tree ────────────────────────────────────────────────────────────────
+vim.pack.add {
+  gh 'nvim-neo-tree/neo-tree.nvim',
+  gh 'MunifTanjim/nui.nvim', -- UI dependency für neo-tree
+}
+require('neo-tree').setup {
+  close_if_last_window = true, -- schließen wenn letztes Window
+  popup_border_style = 'rounded',
+  enable_git_status = true,
+  enable_diagnostics = true,
+  default_component_configs = {
+    indent = {
+      indent_size = 2,
+      padding = 1,
+      with_markers = true,
+      indent_marker = '│',
+      last_indent_marker = '└',
+      highlight = 'NeoTreeIndentMarker',
+    },
+    icon = {
+      folder_closed = '',
+      folder_open = '',
+      folder_empty = '',
+      folder_empty_open = '',
+      default = '',
+      selected = '󰄯',
+      use_filtered_colors = true,
+    },
+    git_status = {
+      symbols = {
+        added = '',
+        modified = '',
+        deleted = '✖',
+        renamed = '➜',
+        untracked = '',
+        ignored = '◌',
+        unstaged = '✗',
+        staged = '✓',
+        conflict = '',
+      },
+    },
+  },
+  window = {
+    position = 'left',
+    width = 35,
+    mapping_options = { noremap = true, nowait = true },
+    mappings = {
+      ['<CR>'] = 'open',
+      ['l'] = 'open', -- vim-style: rechts = öffnen
+      ['h'] = 'close_node', -- vim-style: links = schließen
+      ['v'] = 'open_vsplit',
+      ['s'] = 'open_split',
+      ['t'] = 'open_tabnew',
+      ['C'] = 'close_node',
+      ['z'] = 'close_all_nodes',
+      ['a'] = 'add',
+      ['d'] = 'delete',
+      ['r'] = 'rename',
+      ['y'] = 'copy_to_clipboard',
+      ['x'] = 'cut_to_clipboard',
+      ['p'] = 'paste_from_clipboard',
+      ['q'] = 'close_window',
+      ['?'] = 'show_help',
+      ['ß'] = 'show_help',
+      ['<'] = 'prev_source', -- zwischen Filesystem/Git/Buffers wechseln
+      ['>'] = 'next_source',
+      ['H'] = 'toggle_hidden', -- dotfiles ein/ausblenden
+      ['R'] = 'refresh', -- manuell aktualisieren
+      ['i'] = 'show_file_details', -- Dateiinfos anzeigen
+      ['<esc>'] = 'cancel', -- Aktion abbrechen
+      ['P'] = { 'toggle_preview', config = { use_float = true } }, -- Vorschau
+    },
+  },
+  filesystem = {
+    filtered_items = {
+      visible = false,
+      hide_dotfiles = false, -- dotfiles anzeigen
+      hide_gitignored = false,
+    },
+    follow_current_file = {
+      enabled = true, -- aktuelle Datei im Tree markieren
+    },
+    use_libuv_file_watcher = true, -- automatisch aktualisieren
+  },
+}
+
+-- Toggle neo-tree
+vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>', { desc = 'Show file explorer' })
+-- Neo-tree auf aktuelle Datei fokussieren
+vim.keymap.set('n', '<leader>ng', '<cmd>Neotree git_status<CR>', { desc = 'Neotree Git status' })
+vim.keymap.set('n', '<leader>nb', '<cmd>Neotree buffers<CR>', { desc = 'Neotree Buffers' })
+
+-- Neo-tree Farben passend zu Solarized:
+vim.api.nvim_set_hl(0, 'NeoTreeNormal', { bg = '#073642' })
+vim.api.nvim_set_hl(0, 'NeoTreeNormalNC', { bg = '#073642' })
+vim.api.nvim_set_hl(0, 'NeoTreeBorder', { bg = '#073642', fg = '#859900' })
+vim.api.nvim_set_hl(0, 'NeoTreeDirectoryName', { fg = '#268bd2', bold = true })
+vim.api.nvim_set_hl(0, 'NeoTreeDirectoryIcon', { fg = '#268bd2' })
+vim.api.nvim_set_hl(0, 'NeoTreeFileName', { fg = '#93a1a1' })
+vim.api.nvim_set_hl(0, 'NeoTreeFileIcon', { fg = '#586e75' })
+vim.api.nvim_set_hl(0, 'NeoTreeRootName', { fg = '#859900', bold = true })
+vim.api.nvim_set_hl(0, 'NeoTreeGitAdded', { fg = '#859900' })
+vim.api.nvim_set_hl(0, 'NeoTreeGitModified', { fg = '#b58900' })
+vim.api.nvim_set_hl(0, 'NeoTreeGitDeleted', { fg = '#dc322f' })
+vim.api.nvim_set_hl(0, 'NeoTreeGitUntracked', { fg = '#2aa198' })
+vim.api.nvim_set_hl(0, 'NeoTreeIndentMarker', { fg = '#073642' })
+vim.api.nvim_set_hl(0, 'NeoTreeExpander', { fg = '#586e75' })
+
+--
 
 -- Brighter white text:
 vim.api.nvim_set_hl(0, 'Normal', { ctermfg = 252, fg = '#d0d0d0' })
