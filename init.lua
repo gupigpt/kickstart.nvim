@@ -449,42 +449,6 @@ do
   vim.api.nvim_set_hl(0, 'WhichKeyFloat', { bg = '#073642' }) -- Hintergrund
   vim.api.nvim_set_hl(0, 'WhichKeyBorder', { bg = '#073642', fg = '#859900' })
 
-
--- Show number of occurrences when searching for sth
-vim.pack.add { gh 'kevinhwang91/nvim-hlslens' }
-require('hlslens').setup {
-  calm_down = true, -- highlight verschwindet wenn Cursor sich bewegt
-  nearest_only = true, -- nur aktuellen Treffer hervorheben
-  nearest_float_when = 'never',
-}
-
-vim.api.nvim_create_autocmd('ColorScheme', {
-  pattern = '*',
-  callback = function()
-    vim.api.nvim_set_hl(0, 'HlSearchNear',     { fg = '#002b36', bg = '#859900', bold = true })
-    vim.api.nvim_set_hl(0, 'HlSearchLens',     { fg = '#859900', bg = 'none' })
-    vim.api.nvim_set_hl(0, 'HlSearchLensNear', { fg = '#93a1a1', bg = 'none', bold = true })
-    vim.api.nvim_set_hl(0, 'HlSearchFloat',    { fg = '#002b36', bg = '#859900' })
-    vim.api.nvim_set_hl(0, 'Search',           { fg = '#002b36', bg = '#b58900' })
-    vim.api.nvim_set_hl(0, 'IncSearch',        { fg = '#002b36', bg = '#859900', bold = true })
-  end,
-})
-
--- n/N Mappings ersetzen:
-vim.keymap.set('n', 'n', function()
-  vim.cmd 'normal! n'
-  require('hlslens').start()
-  local count = vim.fn.searchcount { maxcount = 0 }
-  if count.total > 0 then vim.notify(string.format('%d/%d', count.current, count.total), vim.log.levels.INFO) end
-end)
-vim.keymap.set('n', 'N', function()
-  vim.cmd 'normal! N'
-  require('hlslens').start()
-  local count = vim.fn.searchcount { maxcount = 0 }
-  if count.total > 0 then vim.notify(string.format('%d/%d', count.current, count.total), vim.log.levels.INFO) end
-end)
-
-
   -- [[ Colorscheme ]]
   -- You can easily change to a different colorscheme.
   -- Change the name of the colorscheme plugin below, and then
@@ -505,9 +469,38 @@ end)
   vim.pack.add { gh 'Tsuzat/NeoSolarized.nvim' }
   require('NeoSolarized').setup {
     style = 'dark',
-    transparent = true,
-  }
-  vim.cmd.colorscheme 'NeoSolarized'
+  transparent = true,
+}
+vim.cmd.colorscheme 'NeoSolarized'
+
+-- ─── nvim-hlslens ────────────────────────────────────────────────────────────
+vim.pack.add { gh 'kevinhwang91/nvim-hlslens' }
+require('hlslens').setup {
+calm_down = true,
+nearest_only = true,
+nearest_float_when = 'auto', -- if line is too long, show in a float box
+}
+
+-- Farben nach colorscheme setzen (sonst werden sie überschrieben):
+vim.api.nvim_set_hl(0, 'HlSearchNear',     { fg = '#002b36', bg = '#859900', bold = true })
+vim.api.nvim_set_hl(0, 'HlSearchLens',     { fg = '#2aa198' })
+vim.api.nvim_set_hl(0, 'HlSearchLensNear', { fg = '#859900', bold = true })
+vim.api.nvim_set_hl(0, 'Search',           { fg = '#002b36', bg = '#b58900' })
+vim.api.nvim_set_hl(0, 'IncSearch',        { fg = '#002b36', bg = '#859900', bold = true })
+
+-- n/N Mappings:
+vim.keymap.set('n', 'n', function()
+  vim.cmd('normal! ' .. vim.v.count1 .. 'n')
+  require('hlslens').start()
+end)
+vim.keymap.set('n', 'N', function()
+  vim.cmd('normal! ' .. vim.v.count1 .. 'N')
+  require('hlslens').start()
+end)
+-- hlslens auch für * und # aktivieren:
+vim.keymap.set('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]])
+vim.keymap.set('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]])
+
 
   -- remove current line coloring
   vim.api.nvim_set_hl(0, 'CursorLine', { bg = 'none' })
@@ -626,6 +619,11 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
     end
     local diagnostics = statusline.section_diagnostics { trunc_width = 75 }
 
+    -- Show search count (hlslens) in the middle of the status bar
+    --local search = ''
+    --local ok, count = pcall(vim.fn.searchcount, { maxcount = 0 })
+    --if ok and count.total and count.total > 0 then search = string.format(' %d/%d ', count.current, count.total) end
+
     -- Encoding + Filetype
     local enc = vim.bo.fileencoding ~= '' and vim.bo.fileencoding or vim.o.encoding
     local ft = vim.bo.filetype ~= '' and vim.bo.filetype or 'no ft'
@@ -640,6 +638,8 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
       { hl = 'MiniStatuslineDevinfo', strings = { lsp, diagnostics } },
       '%<',
       { hl = 'MiniStatuslineFilename', strings = { '%t' } },
+      '%=',
+      { hl = 'MiniStatuslineFileinfo', strings = { search } }, -- mittig
       '%=',
       { hl = 'MiniStatuslineFileinfo', strings = { enc .. '  ' .. ft } },
       { hl = mode_hl, strings = { location } },
@@ -814,11 +814,6 @@ do
   -- Shortcut for searching your Neovim configuration files
   vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
 end
-
--- Farben passend zu Solarized:
-vim.api.nvim_set_hl(0, 'HlSearchNear', { fg = '#002b36', bg = '#859900', bold = true })
-vim.api.nvim_set_hl(0, 'HlSearchLens', { fg = '#586e75', bg = 'none' })
-vim.api.nvim_set_hl(0, 'HlSearchLensNear', { fg = '#93a1a1', bg = 'none', bold = true })
 
 -- ============================================================
 -- SECTION 5: LSP
