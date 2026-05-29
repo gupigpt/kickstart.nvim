@@ -406,9 +406,6 @@ do
     end,
   }
 
-  -- Very weak grey color for inline blames:
-  vim.api.nvim_set_hl(0, 'GitSignsCurrentLineBlame', { fg = '#253535', italic = true }) --try also #1d3030 or #3d5a5a
-
   -- Useful plugin to show you pending keybinds.
   vim.pack.add { gh 'folke/which-key.nvim' }
   require('which-key').setup {
@@ -471,6 +468,12 @@ do
     transparent = true,
   }
   vim.cmd.colorscheme 'NeoSolarized'
+
+  -- define inline blame color:
+  vim.api.nvim_set_hl(0, 'GitSignsCurrentLineBlame', {
+    fg = '#3d5a5a',
+    italic = true,
+  })
 
   -- ─── nvim-hlslens ────────────────────────────────────────────────────────────
   vim.pack.add { gh 'kevinhwang91/nvim-hlslens' }
