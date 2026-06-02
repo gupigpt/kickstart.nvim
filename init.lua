@@ -374,37 +374,216 @@ do
   -- since otherwise the icons won't display properly.
   if vim.g.have_nerd_font then vim.pack.add { gh 'nvim-tree/nvim-web-devicons' } end
 
-  -- Here is a more advanced configuration example that passes options to `gitsigns.nvim`
-  --
   -- See `:help gitsigns` to understand what each configuration key does.
-  -- Adds git related signs to the gutter, as well as utilities for managing changes
-  vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
-  require('gitsigns').setup {
-    current_line_blame = true, -- Show inline git blame
-    current_line_blame_opts = {
-      delay = 800, -- ms bis es erscheint
-      virt_text_pos = 'right_align', -- Show the blame on the right - other option "eol" to show directly after the code
-    },
-    current_line_blame_formatter = '  <author>, <author_time:%d.%m.%Y> · <summary>',
-    signs = {
-      add = { text = '+' }, ---@diagnostic disable-line: missing-fields
-      change = { text = '~' }, ---@diagnostic disable-line: missing-fields
-      delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
-      topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
-      changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
-    },
-    on_attach = function(bufnr)
-      local gs = package.loaded.gitsigns
-      vim.keymap.set('n', '<leader>hs', gs.stage_hunk, { buffer = bufnr, desc = 'Stage hunk' })
-      vim.keymap.set('n', '<leader>hr', gs.reset_hunk, { buffer = bufnr, desc = 'Reset hunk' })
-      vim.keymap.set('n', '<leader>hp', gs.preview_hunk, { buffer = bufnr, desc = 'Preview hunk' })
-      vim.keymap.set('n', '<leader>hb', gs.blame_line, { buffer = bufnr, desc = 'Blame line' })
-      vim.keymap.set('n', '<leader>hd', gs.diffthis, { buffer = bufnr, desc = 'Diff this' })
-      vim.keymap.set('n', '<leader>hn', gs.next_hunk, { buffer = bufnr, desc = 'Go to next hunk' })
-      vim.keymap.set('n', '<leader>hN', gs.prev_hunk, { buffer = bufnr, desc = 'Go to previous hunk' })
-    end,
-  }
 
+  vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
+  vim.pack.add { gh 'dlyongemallo/diffview-plus.nvim' }
+
+-- =============================================================================
+-- GIT INTEGRATION
+-- gitsigns.nvim  : inline hunk signs, blame, word diff
+-- diffview.nvim  : full-screen diff viewer, file history, merge conflicts
+-- =============================================================================
+
+-- ---------------------------------------------------------------------------
+-- Helper: detect whether the repo uses "main" or "master" as default branch
+-- ---------------------------------------------------------------------------
+local function default_branch()
+  local res = vim.system(
+    { 'git', 'rev-parse', '--verify', 'main' },
+    { capture_output = true }
+  ):wait()
+  return res.code == 0 and 'main' or 'master'
+end
+
+-- ---------------------------------------------------------------------------
+-- Helper: open DiffviewOpen with a free-text revision prompt.
+--
+-- Common inputs:
+--   HEAD          → diff of the latest commit vs. working tree
+--   HEAD~3        → diff of the last 3 commits combined
+--   main..HEAD    → all changes on your feature branch vs. main
+--   <commit hash> → diff of a specific commit
+--   (empty)       → working tree vs. index (same as :DiffviewOpen with no args)
+-- ---------------------------------------------------------------------------
+local function diff_open_prompt()
+  local input = vim.fn.input('DiffviewOpen: ')
+  vim.cmd('DiffviewOpen ' .. input)
+end
+
+-- ---------------------------------------------------------------------------
+-- Helper: open DiffviewFileHistory with a free-text path/flag prompt.
+--
+-- Common inputs:
+--   %             → commit history of the current file
+--   .             → commit history of the entire repo (all files)
+--   src/foo.lua   → commit history of a specific file by path
+--   (empty)       → same as "." – full repo history
+-- ---------------------------------------------------------------------------
+local function diff_history_prompt()
+  local input = vim.fn.input('DiffviewFileHistory: ')
+  -- Prepend a space so "DiffviewFileHistory%" doesn't become a syntax error
+  -- when the user types a path without a leading space
+  vim.cmd('DiffviewFileHistory ' .. input)
+end
+
+-- =============================================================================
+-- GITSIGNS SETUP
+-- =============================================================================
+require('gitsigns').setup {
+  current_line_blame = true,
+  current_line_blame_opts = {
+    delay = 800,
+    virt_text_pos = 'right_align',
+  },
+  current_line_blame_formatter = '  <author>, <author_time:%d/%m/%Y> · <summary>',
+  signs = {
+    add          = { text = '+' }, ---@diagnostic disable-line: missing-fields
+    change       = { text = '~' }, ---@diagnostic disable-line: missing-fields
+    delete       = { text = '_' }, ---@diagnostic disable-line: missing-fields
+    topdelete    = { text = '‾' }, ---@diagnostic disable-line: missing-fields
+    changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
+  },
+
+  on_attach = function(bufnr)
+    local gs = package.loaded.gitsigns
+
+    -- Hunk navigation
+    -- Using gj/gk to mirror vim's j/k movement direction
+    vim.keymap.set('n', '<leader>gj', gs.next_hunk, { buffer = bufnr, desc = 'Go to next hunk' })
+    vim.keymap.set('n', '<leader>gk', gs.prev_hunk, { buffer = bufnr, desc = 'Go to prev hunk' })
+
+    -- Hunk staging & resetting
+    -- gs = stage, gr = reset
+    vim.keymap.set('n', '<leader>gs', gs.stage_hunk,      { buffer = bufnr, desc = 'Stage hunk' })
+    vim.keymap.set('n', '<leader>gr', gs.reset_hunk,      { buffer = bufnr, desc = 'Reset hunk (delete)' })
+    vim.keymap.set('n', '<leader>gu', gs.undo_stage_hunk, { buffer = bufnr, desc = 'Unstage hunk' })
+
+    -- Visual mode: stage only the selected lines within a hunk
+    -- Useful when a hunk contains multiple logical changes you want to split
+    vim.keymap.set('v', '<leader>gs', function()
+      gs.stage_hunk { vim.fn.line('.'), vim.fn.line('v') }
+    end, { buffer = bufnr, desc = 'Stage selected lines' })
+
+    -- -------------------------------------------------------------------------
+    -- Hunk inspection
+    -- Preview the hunk under cursor in a floating window (quick glance, no tab switch)
+    vim.keymap.set('n', '<leader>gp', gs.preview_hunk,  { buffer = bufnr, desc = 'Preview hunk under cursor' })
+
+    -- Open full blame popup for the current line (shows hash, date, full message)
+    vim.keymap.set('n', '<leader>gb', gs.blame_line,    { buffer = bufnr, desc = 'Show line blame (popup)' })
+
+    -- -------------------------------------------------------------------------
+    -- Inline diff toggles (visualize changes without leaving the buffer)
+    -- Highlight changed words within a line (more granular than line-level diff)
+    vim.keymap.set('n', '<leader>gw', gs.toggle_word_diff,  { buffer = bufnr, desc = 'Toggle word-level diff' })
+
+    -- Show deleted lines as virtual text below their original position
+    -- Useful to see exactly what was removed without opening a full diff view
+    vim.keymap.set('n', '<leader>gx', gs.toggle_deleted,    { buffer = bufnr, desc = 'Toggle deleted lines' })
+  end,
+}
+
+-- =============================================================================
+-- DIFFVIEW SETUP
+-- =============================================================================
+require('diffview').setup {
+  -- More precise highlighting within changed lines (slightly heavier on rendering)
+  enhanced_diff_hl = true,
+  view = {
+    default = {
+      layout = 'diff2_horizontal',
+      winbar_info = true,  -- show branch/commit info in the winbar
+    },
+    -- 3-way layout for merge conflicts: LOCAL | BASE | REMOTE
+    merge_tool = {
+      layout = 'diff3_mixed',
+      disable_diagnostics = true,  -- reduce noise during conflict resolution
+    },
+  },
+}
+
+-- =============================================================================
+-- DIFFVIEW KEYMAPS (global, not buffer-local)
+-- =============================================================================
+
+-- Open/close
+vim.keymap.set('n', '<leader>go', '<cmd>DiffviewOpen<cr>',  { desc = 'Open file\'s staged/unstaged diff' })
+vim.keymap.set('n', '<leader>gq', '<cmd>DiffviewClose<cr>', { desc = 'Close diff view' })
+
+-- Prompt-based open: lets you type any revision expression freely
+-- Examples: HEAD, HEAD~3, main..HEAD, <hash>
+vim.keymap.set('n', '<leader>gi', diff_open_prompt,    { desc = 'Compare revision (prompt)' }) --Diff: open revision (prompt)
+
+-- File history: prompt-based, type a path or "%" or "."
+vim.keymap.set('n', '<leader>gh', diff_history_prompt, { desc = 'Browse history (prompt)' }) --Diff: file history (prompt)
+
+-- Shortcut for the two most common history calls (no typing needed)
+vim.keymap.set('n', '<leader>gf', '<cmd>DiffviewFileHistory --follow %<cr>', { desc = 'Browse current file\'s diff history' })
+vim.keymap.set('n', '<leader>gF', '<cmd>DiffviewFileHistory .<cr>',          { desc = 'Browse repo diff history' })
+
+-- History of the current line only (traces when this exact line last changed)
+vim.keymap.set('n', '<leader>gL', '<cmd>.DiffviewFileHistory --follow<cr>',          { desc = 'Browse current line\'s diff history' })
+-- History of the visual selection (traces changes to the selected range)
+vim.keymap.set('v', '<leader>gL', "<Esc><Cmd>'<,'>DiffviewFileHistory --follow<CR>", { desc = 'Browse selection\'s diff history' })
+
+-- Compare working tree against the default branch (main or master)
+-- Useful at the start of a PR review or before rebasing
+vim.keymap.set('n', '<leader>gm', function()
+  vim.cmd('DiffviewOpen ' .. default_branch())
+end, { desc = 'Compare this branch with local master' })
+
+-- Compare against the remote default branch
+-- Useful to see what you'd be pushing
+vim.keymap.set('n', '<leader>gM', function()
+  vim.cmd('DiffviewOpen HEAD..origin/' .. default_branch())
+end, { desc = 'Compare this branch with origin/master' })
+
+-- =============================================================================
+-- CLIPBOARD DIFF
+-- Compare the current buffer (or a visual selection) against clipboard contents.
+-- Useful for: comparing AI output, a copied snippet, or any external text.
+-- =============================================================================
+
+-- :Ns creates a temporary scratch buffer (no file, no save prompt on close)
+vim.api.nvim_create_user_command('Ns', function()
+  vim.cmd([[
+    execute 'vsplit | enew'
+    setlocal buftype=nofile
+    setlocal bufhidden=hide
+    setlocal noswapfile
+  ]])
+end, { nargs = 0 })
+
+-- :CompareClipboard opens the current file and clipboard side-by-side in diff mode
+vim.api.nvim_create_user_command('CompareClipboard', function()
+  local ftype = vim.api.nvim_eval('&filetype')
+  vim.cmd([[
+    tabnew %
+    Ns
+    normal! P
+    windo diffthis
+  ]])
+  vim.cmd('set filetype=' .. ftype)
+end, { nargs = 0 })
+
+vim.keymap.set('n', '<leader>gc', '<cmd>CompareClipboard<cr>', { desc = 'Compare buffer to clipboard' })
+
+-- Visual variant: diff only the selected lines against clipboard
+vim.keymap.set('v', '<leader>gc', function()
+  vim.cmd([[
+    normal! gv"zy
+    execute 'tabnew | setlocal buftype=nofile bufhidden=hide noswapfile'
+    normal! V"zp
+    Ns
+    normal! Vp
+    windo diffthis
+  ]])
+end, { desc = 'Compare selection to clipboard' })
+
+-- =============================================================================
+
+  --
   -- Useful plugin to show you pending keybinds.
   vim.pack.add { gh 'folke/which-key.nvim' }
   require('which-key').setup {
@@ -495,6 +674,48 @@ do
     italic = true,
   })
 
+--[[
+-- TODO: farben ändern!
+-- gitdiff plugin design:
+local ok, NeoSolarized = pcall(require, 'NeoSolarized')
+if ok then
+  NeoSolarized.setup {
+    style = 'dark',
+    transparent = true,
+    terminal_colors = true,
+    enable_italics = true,
+    on_highlights = function(highlights, colors)
+      -- Added lines: subtiles grün, passend zum dunklen Solarized-Hintergrund
+      highlights.DiffAdd    = { bg = '#1a3a2a', fg = 'NONE' }
+      -- Changed lines: dunkles blau-grau
+      highlights.DiffChange = { bg = '#1a2a3a', fg = 'NONE' }
+      -- Deleted lines: dezentes rot
+      highlights.DiffDelete = { bg = '#3a1a1a', fg = colors.red }
+      -- Changed words within a line (nur aktiv wenn enhanced_diff_hl = true)
+      highlights.DiffText   = { bg = '#2a3a1a', fg = 'NONE', bold = true }
+
+      -- gitsigns: die schmalen Zeichen-Spalte links
+      highlights.GitSignsAdd    = { fg = colors.green }
+      highlights.GitSignsChange = { fg = colors.blue }
+      highlights.GitSignsDelete = { fg = colors.red }
+    end,
+  }
+end
+--]]
+
+
+on_highlights = function(highlights, colors)
+  -- Add: etwas helleres grün als der Standard, deutlich erkennbar
+  highlights.DiffAdd    = { bg = '#003820' }
+  -- Change: blau statt gelb – passt zu Solarized und ist viel lesbarer
+  highlights.DiffChange = { bg = '#003050' }
+  -- Delete: etwas kräftigeres rot damit gelöschte Zeilen auffallen
+  highlights.DiffDelete = { bg = '#3a0800' }
+  -- Text innerhalb geänderter Zeilen: helleres blau damit der Unterschied
+  -- zu DiffChange sichtbar ist
+  highlights.DiffText   = { bg = '#004a70', bold = true }
+end,
+
   -- ─── nvim-hlslens ────────────────────────────────────────────────────────────
   vim.pack.add { gh 'kevinhwang91/nvim-hlslens' }
   require('hlslens').setup {
@@ -509,6 +730,7 @@ do
   vim.api.nvim_set_hl(0, 'HlSearchLensNear', { fg = '#859900', bold = true })
   vim.api.nvim_set_hl(0, 'Search', { fg = '#002b36', bg = '#b58900' })
   vim.api.nvim_set_hl(0, 'IncSearch', { fg = '#002b36', bg = '#859900', bold = true })
+
 
   -- n/N Mappings:
   vim.keymap.set('n', 'n', function()
@@ -1645,5 +1867,5 @@ vim.pack.add {
   'https://github.com/Eandrju/cellular-automaton.nvim',
 }
 
-vim.keymap.set('n', '<leader>gr', '<cmd>CellularAutomaton make_it_rain<CR>', { desc = 'Make it Rain' })
-vim.keymap.set('n', '<leader>gg', '<cmd>CellularAutomaton game_of_life<CR>', { desc = 'Game of Life' })
+vim.keymap.set('n', '<leader>zr', '<cmd>CellularAutomaton make_it_rain<CR>', { desc = 'Make it Rain' })
+vim.keymap.set('n', '<leader>zg', '<cmd>CellularAutomaton game_of_life<CR>', { desc = 'Game of Life' })
