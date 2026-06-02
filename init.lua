@@ -27,7 +27,6 @@ What is Kickstart?
   Kickstart.nvim is a starting point for your own configuration.
     The goal is that you can read every line of code, top-to-bottom, understand
     what your configuration is doing, and modify it to suit your needs.
-
     Once you've done that, you can start exploring, configuring and tinkering to
     make Neovim your own! That might mean leaving Kickstart just the way it is for a while
     or immediately breaking it into modular pieces. It's up to you!
@@ -409,21 +408,35 @@ do
   -- Useful plugin to show you pending keybinds.
   vim.pack.add { gh 'folke/which-key.nvim' }
   require('which-key').setup {
+    preset = 'modern', -- 'classic', 'modern', 'helix'
     -- Delay between pressing a key and opening which-key (milliseconds)
-    delay = 600, --in millisec - set to sth higher so fast commands don't show a pop up
-    icons = { mappings = vim.g.have_nerd_font },
+    -- No delay for registers (" in N mode / Ctrl-r in I mode)
+    delay = function(ctx)
+      if ctx.plugin == 'registers' then return 0 end
+      return 400
+    end,
+    plugins = {
+      marks = true,
+      registers = true,
+    },
+    icons = {
+      mappings = vim.g.have_nerd_font,
+      separator = '➜',
+      group = '+',
+      ellipsis = '…',
+    },
     filter = function(mapping) return mapping.lhs ~= ',' end,
     layout = {
-      width = { min = 20, max = 50 },
+      width = { min = 18, max = 50 },
       spacing = 3,
     },
     win = {
       border = 'rounded',
       padding = { 1, 2 },
       -- Transparent background (like telescope):
-      -- wo = {
-      -- winblend = 15,
-      -- },
+      wo = {
+        winblend = 0,
+      },
     },
     spec = {
       { '<leader>s', group = 'Search', mode = { 'n', 'v' } },
@@ -435,6 +448,13 @@ do
       { '<leader>o', group = 'Oil' },
       { 'gr', group = 'LSP' },
       { '<leader>z', group = 'Games' }, -- für cellular-automaton
+    },
+    replace = {
+      desc = {
+        { 'synchronized with the system clipboard', 'system clipboard' },
+        { 'last deleted, changed, or yanked', 'last delete/change/yank' },
+        { 'name of the current file', 'current file' },
+      },
     },
   }
   -- Which-key popup menu design:
