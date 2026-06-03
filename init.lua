@@ -660,6 +660,9 @@ end, { desc = 'Compare selection to clipboard' })
     },
   }
 --]]
+  -- alternatives Theme Solarized Osaka:
+  vim.pack.add { gh 'craftzdog/solarized-osaka.nvim' }
+
   -- neues Theme NeoSolarized:
   vim.pack.add { gh 'Tsuzat/NeoSolarized.nvim' }
   require('NeoSolarized').setup {
