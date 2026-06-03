@@ -1720,8 +1720,8 @@ vim.keymap.set('n', 'o', 'o<esc>')
 vim.keymap.set('n', 'O', 'O<esc>')
 
 -- --- Paste behavior ---------------------------------------------------------
-vim.keymap.set('n', 'p', 'P')
-vim.keymap.set('n', 'P', 'p')
+--vim.keymap.set('n', 'p', 'P')
+--vim.keymap.set('n', 'P', 'p')
 vim.keymap.set('v', '<c-c>', '"+y')
 vim.keymap.set('', '<c-p>', '"+P')
 
