@@ -523,9 +523,9 @@ vim.keymap.set('n', '<leader>gf', '<cmd>DiffviewFileHistory --follow %<cr>', { d
 vim.keymap.set('n', '<leader>gF', '<cmd>DiffviewFileHistory .<cr>',          { desc = 'Browse repo diff history' })
 
 -- History of the current line only (traces when this exact line last changed)
-vim.keymap.set('n', '<leader>gL', '<cmd>.DiffviewFileHistory --follow<cr>',          { desc = 'Browse current line\'s diff history' })
+vim.keymap.set('n', '<leader>gl', '<cmd>.DiffviewFileHistory --follow<cr>',          { desc = 'Browse current line\'s diff history' })
 -- History of the visual selection (traces changes to the selected range)
-vim.keymap.set('v', '<leader>gL', "<Esc><Cmd>'<,'>DiffviewFileHistory --follow<CR>", { desc = 'Browse selection\'s diff history' })
+vim.keymap.set('v', '<leader>gl', "<Esc><Cmd>'<,'>DiffviewFileHistory --follow<CR>", { desc = 'Browse selection\'s diff history' })
 
 -- Compare working tree against the default branch (main or master)
 -- Useful at the start of a PR review or before rebasing
