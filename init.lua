@@ -1392,8 +1392,8 @@ do
     use_default_keymaps = false,
     keymaps = {
       -- Explorer-like navigation
-      ['h'] = { 'actions.parent', desc = 'Go to parent directory' },
-      ['l'] = { 'actions.select', desc = 'Enter directory/Open file in current buffer' },
+      ['H'] = { 'actions.parent', desc = 'Go to parent directory' },
+      --['l'] = { 'actions.select', desc = 'Enter directory/Open file in current buffer' },
 
       -- Keep explicit alternatives (default mappings)
       ['<CR>'] = { 'actions.select', desc = 'Enter directory/Open file in current buffer (Enter)' },
